@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import yaml
 from os import geteuid, path, chdir
 from sys import argv
 from utils import *
@@ -12,22 +11,12 @@ def check_root():
         print("You need root permission")
         exit(1)
 
-def load_config():
-    try:
-        with open(CONFIG_PATH, 'r') as stream:
-            raw_config = yaml.safe_load(stream)
-            return raw_config
-    except yaml.YAMLError:
-        print_error(f"Yaml parse of {config_file_path} failed")
-        exit(1)
-    except IOError:
-        print_error(f"File {config_file_path} does not exists")
-        exit(1)
-
-
 def main():
     check_root()
-    config = load_config()
+    config = load_config(CONFIG_PATH)
+    if len(argv) < 2:
+        print_help()
+        exit(0)
     command = argv[1].lower()
     if command == "start":
         backup_hosts()
@@ -37,7 +26,6 @@ def main():
     else:
         print_help()
 
-
-
 if __name__ == "__main__":
     main()
+
