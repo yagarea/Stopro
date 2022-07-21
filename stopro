@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from os import geteuid, path, chdir
-from sys import argv
-from utils import *
+from commands import *
+from args import get_args
 
-CONFIG_PATH = "/home/john/.config/stopro/conf.yml"
+CONFIG_PATH = "/etc/stopro/conf.yml"
 
 def check_root():
     if geteuid() != 0:
@@ -14,17 +14,13 @@ def check_root():
 def main():
     check_root()
     config = load_config(CONFIG_PATH)
-    if len(argv) < 2:
-        print_help()
-        exit(0)
-    command = argv[1].lower()
-    if command == "start":
-        backup_hosts()
-        forbid_sites(config["forbidden_sites"])
-    elif command == "stop":
-        apply_backup()
-    else:
-        print_help()
+    arguments = get_args()
+    if arguments.command == "start":
+        cmd_start()
+    elif arguments.command == "stop":
+        cmd_stop()
+    elif arguments.command == "status":
+        cmd_status()
 
 if __name__ == "__main__":
     main()
