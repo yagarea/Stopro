@@ -29,8 +29,13 @@ forbidden_sites:
   - facebook.com
   - tiktok.com
   - thehackernews.com
+  - reddit.com
   - netflix.com
 ```
+
+## Planned
+- print statistics
+- real time updating status
 
 ## About
 If you find any bug please create issue. Same goes for feature requests. I am also open
