@@ -33,7 +33,7 @@ def get_args():
     parser_status = command_parser.add_parser(
             "status",
             help="print info about current session")
-    
+
     parser_config = command_parser.add_parser(
             "config",
             help="opens config file in editor")
