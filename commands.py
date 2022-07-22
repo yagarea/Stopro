@@ -20,9 +20,9 @@ def cmd_stop(arguments, config):
 def cmd_status(arguments, config):
     state = get_state()
     if state["running"]:
-        print("running")
+        print("Self control session is activated")
     else:
-        print("not running")
+        print("Self control session is not activated")
 
 def cmd_config(arguments, config):
     editor = environ.get("$EDITOR", "/usr/bin/vim")
