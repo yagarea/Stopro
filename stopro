@@ -4,14 +4,16 @@ from os import geteuid, path, chdir
 from commands import *
 from args import get_args
 
+
 def check_root():
     if geteuid() != 0:
         print("You need root permission")
         exit(1)
 
+
 def main():
     arguments = get_args()
-    config = load_config(arguments.config_path)
+    config = load_yaml(arguments.config_path)
     if arguments.command == "start":
         check_root()
         cmd_start(arguments, config)
@@ -24,7 +26,7 @@ def main():
     elif arguments.command == "status":
         cmd_status(arguments, config)
 
+
 if __name__ == "__main__":
     main()
-
 
