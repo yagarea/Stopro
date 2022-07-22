@@ -13,12 +13,27 @@ def get_args():
     parser_start = command_parser.add_parser(
             "start", 
             help="start self control session")
+    parser_start.add_argument(
+            "-s", "--silent",
+            dest="silent_mode",
+            required=False,
+            action="store_true",
+            help="silent mode")
+
     parser_stop = command_parser.add_parser(
             "stop",
             help="stop self control session")
+    parser_stop.add_argument(
+            "-s", "--silent",
+            dest="silent_mode",
+            required=False,
+            action="store_true",
+            help="silent mode")
+
     parser_status = command_parser.add_parser(
             "status",
             help="print info about current session")
+    
     parser_config = command_parser.add_parser(
             "config",
             help="opens config file in editor")
