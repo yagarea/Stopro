@@ -20,7 +20,7 @@ def cmd_status(arguments, config):
 
 def cmd_config(arguments, config):
     editor = environ.get("EDITOR", "/usr/bin/vim")
-    call([editor, config.config_path])
+    call([editor, arguments.config_path])
 
 
 
