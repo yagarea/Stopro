@@ -18,12 +18,13 @@ def main():
     elif arguments.command == "stop":
         check_root()
         cmd_stop(arguments, config)
-    elif arguments.command == "status":
-        cmd_status(arguments, config)
     elif arguments.command == "config":
         check_root()
         cmd_config(arguments, config)
+    elif arguments.command == "status":
+        cmd_status(arguments, config)
 
 if __name__ == "__main__":
     main()
+
 
