@@ -4,19 +4,28 @@ import yaml
 
 # Basics
 
-def print_help():
-    print("help")
-
-def load_config(config_path):
+# load yaml file to dictionary
+def load_yaml(yaml_path):
     try:
-        with open(config_path, 'r') as stream:
-            raw_config = yaml.safe_load(stream)
-            return raw_config
+        with open(yaml_path, 'r') as stream:
+            raw_yaml = yaml.safe_load(stream)
+            return raw_yaml
     except yaml.YAMLError:
-        print_error(f"Yaml parse of {config_file_path} failed")
+        print(f"Yaml parse of {yaml_path} failed\nPlease check syntax")
         exit(1)
     except IOError:
-        print_error(f"File {config_file_path} does not exists")
+        print(f"File {yaml_path} does not exists")
+        exit(1)
+
+def write_yaml(yaml_content, file_path):
+    try:
+        with open(file_path, "w") as yaml_file:
+            yaml_file.write(yaml.dump(yaml_content))
+    except yaml.YAMLError:
+        print_error(f"Yaml parse of {yaml_path} failed\nPlease check syntax")
+        exit(1)
+    except IOError:
+        print_error(f"Error occurred while writing to {yaml_path}")
         exit(1)
 
 
@@ -49,4 +58,3 @@ def emergency_stop_verification():
         print("Not good enough")
         exit(0)
     print("Accepted")
-
