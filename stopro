@@ -4,23 +4,25 @@ from os import geteuid, path, chdir
 from commands import *
 from args import get_args
 
-CONFIG_PATH = "/etc/stopro/conf.yml"
-
 def check_root():
     if geteuid() != 0:
         print("You need root permission")
         exit(1)
 
 def main():
-    check_root()
-    config = load_config(CONFIG_PATH)
     arguments = get_args()
+    config = load_config(arguments.config_path)
     if arguments.command == "start":
-        cmd_start()
+        check_root()
+        cmd_start(arguments, config)
     elif arguments.command == "stop":
-        cmd_stop()
+        check_root()
+        cmd_stop(arguments, config)
     elif arguments.command == "status":
-        cmd_status()
+        cmd_status(arguments, config)
+    elif arguments.command == "config":
+        check_root()
+        cmd_config(arguments, config)
 
 if __name__ == "__main__":
     main()
