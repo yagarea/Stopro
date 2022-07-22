@@ -1,6 +1,10 @@
 from shutil import copy2
 from subprocess import call, check_output
+from os import path
+from datetime import datetime
 import yaml
+
+STATE_PATH = "/usr/share/stopro/state.yml"
 
 # Basics
 
@@ -17,6 +21,7 @@ def load_yaml(yaml_path):
         print(f"File {yaml_path} does not exists")
         exit(1)
 
+
 def write_yaml(yaml_content, file_path):
     try:
         with open(file_path, "w") as yaml_file:
@@ -27,6 +32,33 @@ def write_yaml(yaml_content, file_path):
     except IOError:
         print_error(f"Error occurred while writing to {yaml_path}")
         exit(1)
+
+
+# load stopro state
+def get_state():
+    if path.isfile(STATE_PATH):
+        return load_yaml(STATE_PATH)
+    else:
+        clean_state = dict()
+        clean_state["log"] = list()
+        clean_state["running"] = False
+        write_yaml(clean_state, STATE_PATH)
+        return clean_state
+
+
+def log_activity():
+    state = get_state()
+    if state["running"]:                        # is running
+        state["running"] = False
+        if len(state["log"]) > 0:
+            state["log"][-1][1] = datetime.now()
+        else:
+            print("log corrupted")
+            state["log"].append(["?", datetime.now()])
+    else:                                       # is not running
+        state["running"] = True
+        state["log"].append([datetime.now(), "+"])
+    write_yaml(state, STATE_PATH)
 
 
 # Blocking sites functions
@@ -41,6 +73,21 @@ def forbid_sites(forbidden_sites):
         hosts.write("\n\n# SELF CONTROL\n")
         for site in forbidden_sites:
             hosts.write(f"0.0.0.0 {site}\n0.0.0.0 www.{site}\n::0 {site}\n::0 www.{site}\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Not decided if funny or cringe
 def emergency_stop_verification():
@@ -58,3 +105,5 @@ def emergency_stop_verification():
         print("Not good enough")
         exit(0)
     print("Accepted")
+
+
