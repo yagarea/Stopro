@@ -51,13 +51,13 @@ def log_activity():
     if state["running"]:                        # is running
         state["running"] = False
         if len(state["log"]) > 0:
-            state["log"][-1][1] = datetime.now()
+            state["log"][-1][1] = str(datetime.now())
         else:
             print("log corrupted")
-            state["log"].append(["?", datetime.now()])
+            state["log"].append(["?", str(datetime.now())])
     else:                                       # is not running
         state["running"] = True
-        state["log"].append([datetime.now(), "+"])
+        state["log"].append([str(datetime.now()), "+"])
     write_yaml(state, STATE_PATH)
 
 
@@ -73,37 +73,5 @@ def forbid_sites(forbidden_sites):
         hosts.write("\n\n# SELF CONTROL\n")
         for site in forbidden_sites:
             hosts.write(f"0.0.0.0 {site}\n0.0.0.0 www.{site}\n::0 {site}\n::0 www.{site}\n")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Not decided if funny or cringe
-def emergency_stop_verification():
-    answer = input("Are you sure this is emergency ? [y/n]\n")
-    if answer.lower() not in ["y", "yes"]:
-        exit(0)
-    answer = input("Really ? [y/n]\n")
-    if answer.lower() not in ["y", "yes"]:
-        exit(0)
-    answer = input("Isn't it really just a dull attempt to satisfy your internet addiction?  ? [y/n]\n") 
-    if answer.lower() not in ["y", "yes"]:
-        exit(0)
-    answer = input("Than beg!\n")
-    if len(answer) < 30:
-        print("Not good enough")
-        exit(0)
-    print("Accepted")
 
 
