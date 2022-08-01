@@ -1,6 +1,7 @@
 from utils import *
 from os import environ
 from subprocess import call
+from stats import *
 
 def cmd_start(arguments, config):
     backup_hosts()
@@ -19,10 +20,8 @@ def cmd_stop(arguments, config):
 
 def cmd_status(arguments, config):
     state = get_state()
-    if state["running"]:
-        print("Self control session is activated")
-    else:
-        print("Self control session is not activated")
+    s_dur = get_session_durations(state["log"])
+    print_global_stats(state["log"], s_dur, state["running"])
 
 def cmd_config(arguments, config):
     editor = environ.get("$EDITOR", "/usr/bin/vim")
