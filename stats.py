@@ -2,11 +2,12 @@ from dateutil import parser
 from datetime import timedelta
 from rich import print
 
+
 def get_session_durations(sessions: list):
     output = list()
-    for i in range(len(sessions)):
-        if sessions[i][1] != "+":
-            start, end = parser.parse(sessions[i][0]), parser.parse(sessions[i][1])
+    for session in sessions:
+        if session[1] != "+":
+            start, end = parser.parse(session[0]), parser.parse(session[1])
             output.append((end - start))
     return output
 
@@ -20,16 +21,19 @@ def format_seccond(seconds: int):
     return f"{int(days)} days {int(hours)} hours {int(minutes)} minutes {int(seconds)} seconds"
 
 
+def print_session_status(is_running):
+    if is_running:
+        print("Self control session is [bold green]activated[/bold green]")
+    else:
+        print("Self control session is [bold red]not activated[/bold red]")
+
+
 def print_global_stats(sessions: list, s_dur: list, is_running: bool):
     total_time = sum([i.seconds for i in s_dur])
     session_count = (len(sessions) - (1 if is_running else 0))
     avg_time = total_time / session_count
 
-
-    if is_running:
-        print("Self control session is [bold green]activated[/bold green]")
-    else:
-        print("Self control session is [bold red]not activated[/bold red]")
+    print_session_status(is_running)
 
     print(f"[bold]Total time:[/bold]\t{format_seccond(total_time)}")
     print(f"[bold]Average time:[/bold]\t{format_seccond(avg_time)}")
