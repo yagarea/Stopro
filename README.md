@@ -8,7 +8,7 @@ distracting pages is fully configurable. This can help you focus and stop wastin
 ## Commands
 - `start`  - starts self control session
 - `stop`   - stops self control session
-- `status` - prints session status (WIP)
+- `status` - prints session status
 - `config` - opens config file in editor
 
 ## Options
@@ -34,8 +34,9 @@ forbidden_sites:
 ```
 
 ## Planned
-- print statistics
+- draw charts
 - real time updating status
+- locking mechanism
 
 ## About
 If you find any bug please create issue. Same goes for feature requests. I am also open
