@@ -31,7 +31,7 @@ def print_session_status(is_running):
 def print_global_stats(sessions: list, s_dur: list, is_running: bool):
     total_time = sum([i.seconds for i in s_dur])
     session_count = (len(sessions) - (1 if is_running else 0))
-    avg_time = total_time / session_count
+    avg_time = total_time / session_count if session_count > 0 else 0
 
     print_session_status(is_running)
 
