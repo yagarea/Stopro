@@ -6,13 +6,14 @@ import argparse
 def get_args():
     arg_parser = argparse.ArgumentParser("StoPro",
             description="Simple utility for productivity and will training.",
-            epilog="If you find any bug or have feature suggestion you can open issue in project repository: github.com/yagarea/Stopro\n\nPublished under GPLv3 license")
+            epilog="If you find any bug or have feature suggestion you can open issue in project repository: github.com/yagarea/Stopro\r\rPublished under GPLv3 license")
 
     command_parser = arg_parser.add_subparsers(title="commands", dest="command", required=True)
 
     parser_start = command_parser.add_parser(
             "start", 
             help="start self control session")
+
     parser_start.add_argument(
             "-s", "--silent",
             dest="silent_mode",
@@ -23,6 +24,7 @@ def get_args():
     parser_stop = command_parser.add_parser(
             "stop",
             help="stop self control session")
+
     parser_stop.add_argument(
             "-s", "--silent",
             dest="silent_mode",
@@ -37,6 +39,10 @@ def get_args():
     parser_config = command_parser.add_parser(
             "config",
             help="opens config file in editor")
+
+    parser_clear_history = command_parser.add_parser(
+            "clear-history",
+            help="remove all logs and use history")
 
     arg_parser.add_argument(
             "-s", "--silent",
