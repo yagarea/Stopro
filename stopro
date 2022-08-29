@@ -25,6 +25,8 @@ def main():
         cmd_config(arguments, config)
     elif arguments.command == "status":
         cmd_status(arguments, config)
+    elif arguments.command == "clear-history":
+        cmd_clear_history(arguments, config)
 
 
 if __name__ == "__main__":
