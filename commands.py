@@ -34,3 +34,13 @@ def cmd_status(arguments, config):
 def cmd_config(arguments, config):
     editor = environ.get("$EDITOR", "/usr/bin/vim")
     call([editor, arguments.config_path])
+def cmd_clear_history(arguments, config):
+    state = get_state()
+    if state["running"]:
+        print("You can not clear history during self control session. To continue stop current session and try again.")
+    else:
+        print("Are you sure you want to clear your history ? [red](this is permanent)[/red] [bold][Y/N][/bold] ")
+        answer = str(input()).lower()
+        if answer in ("yes", "y"):
+            create_new_clean_state()
+            print("History was successfully deleted")
