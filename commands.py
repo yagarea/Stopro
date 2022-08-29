@@ -2,6 +2,8 @@ from utils import *
 from os import environ
 from subprocess import call
 from stats import *
+from rich import print
+
 
 def cmd_start(arguments, config):
     state = get_state()
@@ -31,9 +33,12 @@ def cmd_status(arguments, config):
     s_dur = get_session_durations(state["log"])
     print_global_stats(state["log"], s_dur, state["running"])
 
+
 def cmd_config(arguments, config):
     editor = environ.get("$EDITOR", "/usr/bin/vim")
     call([editor, arguments.config_path])
+
+
 def cmd_clear_history(arguments, config):
     state = get_state()
     if state["running"]:
@@ -44,3 +49,6 @@ def cmd_clear_history(arguments, config):
         if answer in ("yes", "y"):
             create_new_clean_state()
             print("History was successfully deleted")
+
+
+
