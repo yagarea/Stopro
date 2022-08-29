@@ -6,10 +6,11 @@ When you activate *self control session* all distracting pages will be blocked. 
 distracting pages is fully configurable. This can help you focus and stop wasting time.
 
 ## Commands
-- `start`  - starts self control session
-- `stop`   - stops self control session
-- `status` - prints session status
-- `config` - opens config file in editor
+- `start`           - starts self control session
+- `stop`            - stops self control session
+- `status`          - prints session status
+- `config`          - opens config file in editor
+- `clear-history`   - remove all logs and usage history
 
 ## Options
 - `-s`,`--silent` - silent mode
@@ -34,9 +35,9 @@ forbidden_sites:
 ```
 
 ## Planned
-- draw charts
 - real time updating status
 - locking mechanism
+- draw charts
 
 ## About
 If you find any bug please create issue. Same goes for feature requests. I am also open

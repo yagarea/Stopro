@@ -42,7 +42,7 @@ def get_args():
 
     parser_clear_history = command_parser.add_parser(
             "clear-history",
-            help="remove all logs and use history")
+            help="remove all logs and usage history")
 
     arg_parser.add_argument(
             "-s", "--silent",
