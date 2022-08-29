@@ -4,18 +4,26 @@ from subprocess import call
 from stats import *
 
 def cmd_start(arguments, config):
-    backup_hosts()
-    forbid_sites(config["forbidden_sites"])
-    log_activity()
-    if not arguments.silent_mode:
-        print("Your self control session started")
+    state = get_state()
+    if state["running"]:
+        print("A self control session is already in progress")
+    else:
+        backup_hosts()
+        forbid_sites(config["forbidden_sites"])
+        log_activity()
+        if not arguments.silent_mode:
+            print("Your self control session [bold green]started[/bold green]")
 
 
 def cmd_stop(arguments, config):
-    apply_backup()
-    log_activity()
-    if not arguments.silent_mode:
-        print("Your self control session ended")
+    state = get_state()
+    if state["running"]:
+        apply_backup()
+        log_activity()
+        if not arguments.silent_mode:
+            print("Your self control session [bold green]ended[/bold green]")
+    else:
+        print("No self control session is currently running")
 
 
 def cmd_status(arguments, config):
@@ -26,6 +34,3 @@ def cmd_status(arguments, config):
 def cmd_config(arguments, config):
     editor = environ.get("$EDITOR", "/usr/bin/vim")
     call([editor, arguments.config_path])
-
-
-
