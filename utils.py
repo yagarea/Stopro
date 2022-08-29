@@ -33,17 +33,20 @@ def write_yaml(yaml_content, file_path):
         print_error(f"Error occurred while writing to {yaml_path}")
         exit(1)
 
+# create new clean state
+def create_new_clean_state():
+    clean_state = dict()
+    clean_state["log"] = list()
+    clean_state["running"] = False
+    write_yaml(clean_state, STATE_PATH)
+    return clean_state
 
 # load stopro state
 def get_state():
     if path.isfile(STATE_PATH):
         return load_yaml(STATE_PATH)
     else:
-        clean_state = dict()
-        clean_state["log"] = list()
-        clean_state["running"] = False
-        write_yaml(clean_state, STATE_PATH)
-        return clean_state
+        return create_new_clean_state()
 
 
 def log_activity():
@@ -65,8 +68,10 @@ def log_activity():
 def backup_hosts():
     copy2("/etc/hosts", "/etc/hosts.stopro_backup", follow_symlinks=True)
 
+
 def apply_backup():
     call("mv /etc/hosts.stopro_backup /etc/hosts", shell=True)
+
 
 def forbid_sites(forbidden_sites):
     with open("/etc/hosts", "a") as hosts:
