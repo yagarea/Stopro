@@ -51,4 +51,3 @@ def cmd_clear_history(arguments, config):
             print("History was successfully deleted")
 
 
-
