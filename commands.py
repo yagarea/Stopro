@@ -28,7 +28,7 @@ def cmd_stop(arguments, config):
         print("No self control session is currently running")
 
 
-def cmd_status(arguments, config):
+def cmd_stats(arguments, config):
     state = get_state()
     s_dur = get_session_durations(state["log"])
     print_global_stats(state["log"], s_dur, state["running"])
@@ -49,5 +49,12 @@ def cmd_clear_history(arguments, config):
         if answer in ("yes", "y"):
             create_new_clean_state()
             print("History was successfully deleted")
+
+
+def cmd_status(arguments, config):
+    state = get_state()
+    print_session_status(state["running"])
+    if state["running"]:
+        print(format_seccond(get_duration_of_ongoing_session(state["log"]).seconds))
 
 
