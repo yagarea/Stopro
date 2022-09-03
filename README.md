@@ -1,6 +1,6 @@
-# Stopro
-**Sto**p **pro**crastinating and get work done!
+# ![Stopro](https://jc.ggu.cz/files/stopro-logo.png)
 
+Sto**p **pro**crastinating and get work done!
 
 Stopro is simple utility which will help you with self control and build work ethic.
 When you activate *self control session* all distracting pages will be blocked. List of
