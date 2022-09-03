@@ -1,6 +1,7 @@
 # Stopro
 **Sto**p **pro**crastinating and get work done!
 
+
 Stopro is simple utility which will help you with self control and build work ethic.
 When you activate *self control session* all distracting pages will be blocked. List of
 distracting pages is fully configurable. This can help you focus and stop wasting time.
@@ -8,13 +9,15 @@ distracting pages is fully configurable. This can help you focus and stop wastin
 ## Commands
 - `start`           - starts self control session
 - `stop`            - stops self control session
-- `status`          - prints session status
-- `config`          - opens config file in editor
+- `status`          - print info about current session
+- `stats`           - print statistics about usage and time saving
+- `config`          - opens configuration file in editor
 - `clear-history`   - remove all logs and usage history
+
 
 ## Options
 - `-s`,`--silent` - silent mode
-- `-c`,`--config` - use custom config file path
+- `-c`,`--config` - use custom configuration file path
 - `-h`,`--help`   - shows help
 
 ## Configuration
