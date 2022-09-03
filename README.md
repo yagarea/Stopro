@@ -1,7 +1,7 @@
 # ![Stopro](https://jc.ggu.cz/files/stopro-logo.png)
 
-<p align="center">
-**Sto**p **pro**crastinating and get work done!
+<p align="center" style="font-size: 1.5em;">
+<b>Sto</b>p <b>pro</b>crastinating and get work done!
 </p>
 
 Stopro is simple utility which will help you with self control and build work ethic.
