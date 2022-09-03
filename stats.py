@@ -1,5 +1,5 @@
 from dateutil import parser
-from datetime import timedelta
+from datetime import timedelta, datetime
 from rich import print
 
 
@@ -41,3 +41,7 @@ def print_global_stats(sessions: list, s_dur: list, is_running: bool):
     print(f"[bold]Total sessions:[/bold]\t{session_count}")
     print(f"[bold]Longest:[/bold]\t{format_seccond(longest_session)}")
 
+
+def get_duration_of_ongoing_session(log):
+    current_session_start = log[-1][0]
+    return datetime.now() - parser.parse(current_session_start)
