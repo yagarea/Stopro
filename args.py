@@ -38,7 +38,11 @@ def get_args():
 
     parser_config = command_parser.add_parser(
             "config",
-            help="opens config file in editor")
+            help="opens configuration file in editor")
+
+    parser_stats = command_parser.add_parser(
+            "stats",
+            help="print statistics about usage and time saving")
 
     parser_clear_history = command_parser.add_parser(
             "clear-history",
