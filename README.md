@@ -1,4 +1,4 @@
-# ![Stopro](https://jc.ggu.cz/files/stopro-logo.png)
+# ![Stopro](http://127.0.0.1:4000/assets/img/projects/stopro.svg)
 
 <p align="center">
 <b>Sto</b>p <b>pro</b>crastinating and get work done!
