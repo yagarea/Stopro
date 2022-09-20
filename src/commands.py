@@ -55,6 +55,6 @@ def cmd_status(arguments, config):
     state = get_state()
     print_session_status(state["running"])
     if state["running"]:
-        print(format_seccond(get_duration_of_ongoing_session(state["log"]).seconds))
+        print(format_second(get_duration_of_ongoing_session(state["log"])))
 
 

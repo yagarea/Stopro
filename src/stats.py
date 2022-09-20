@@ -12,12 +12,11 @@ def get_session_durations(sessions: list):
     return output
 
 
-def format_seccond(seconds: int):
-    td = timedelta(0, 0, seconds)
-    days = td.days
-    hours = days * 24 + seconds // 3600
-    minutes = (seconds % 3600) // 60
-    seconds = seconds % 60
+def format_second(total_seconds: int):
+    days = total_seconds // (60 * 60 * 24)
+    hours = (total_seconds // 3600 ) % 24
+    minutes = (total_seconds // 60) % 60
+    seconds = total_seconds % 60
     return f"{int(days)} days {int(hours)} hours {int(minutes)} minutes {int(seconds)} seconds"
 
 
@@ -36,10 +35,10 @@ def print_global_stats(sessions: list, s_dur: list, is_running: bool):
 
     print_session_status(is_running)
 
-    print(f"[bold]Total time:[/bold]\t{format_seccond(total_time)}")
-    print(f"[bold]Average time:[/bold]\t{format_seccond(avg_time)}")
+    print(f"[bold]Total time:[/bold]\t{format_second(total_time)}")
+    print(f"[bold]Average time:[/bold]\t{format_second(avg_time)}")
     print(f"[bold]Total sessions:[/bold]\t{session_count}")
-    print(f"[bold]Longest:[/bold]\t{format_seccond(longest_session)}")
+    print(f"[bold]Longest:[/bold]\t{format_second(longest_session)}")
 
 
 def get_duration_of_ongoing_session(log):
