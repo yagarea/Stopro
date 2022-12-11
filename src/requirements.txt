@@ -1,0 +1,7 @@
+commonmark==0.9.1
+pyaml==21.10.1
+Pygments==2.13.0
+python-dateutil==2.8.2
+PyYAML==6.0
+rich==12.6.0
+six==1.16.0
