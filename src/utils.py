@@ -3,6 +3,7 @@ from subprocess import call, check_output
 from os import path
 from datetime import datetime
 import yaml
+from functools import cache
 
 STATE_PATH = "/usr/share/stopro/state.yml"
 
@@ -42,6 +43,7 @@ def create_new_clean_state():
     return clean_state
 
 # load stopro state
+@cache
 def get_state():
     if path.isfile(STATE_PATH):
         return load_yaml(STATE_PATH)
