@@ -6,6 +6,7 @@ from rich import print
 from rich.console import Console
 from rich.columns import Columns
 from achievments import get_achievements
+import lock
 
 
 def cmd_start(arguments, config):
@@ -15,16 +16,24 @@ def cmd_start(arguments, config):
     else:
         backup_hosts()
         forbid_sites(config["forbidden_sites"])
-        log_activity()
         if not arguments.silent_mode:
             print("Your self control session [bold green]started[/bold green]")
+
+        if arguments.locked_for != "":
+            time_in_seconds = lock.parse_lock_time(arguments.locked_for)
+            state = lock.lock(state, time_in_seconds)
+        log_activity(state)
 
 
 def cmd_stop(arguments, config):
     state = get_state()
     if state["running"]:
+        if not lock.is_unlock_allowed(state):
+            print("This session is locked. You can not stop it.")
+            return
         apply_backup()
-        log_activity()
+        state = lock.unlock(state)
+        log_activity(state)
         if not arguments.silent_mode:
             print("Your self control session [bold green]ended[/bold green]")
     else:
@@ -62,6 +71,14 @@ def cmd_clear_history(arguments, config):
 def cmd_status(arguments, config):
     state = get_state()
     print_session_status(state["running"])
-    if state["running"]:
-        print(format_second(get_duration_of_ongoing_session(state["log"])))
+    if not state["running"]:
+        return
+    print(format_second(get_duration_of_ongoing_session(state["log"])))
+    if state["lock"]["is_locked"] and lock.get_remaining_time(state) > 0:
+        print("Locked for: ", end="")
+        print(format_second(lock.get_remaining_time(state)))
+        lock.progressbar(state)
+    else:
+        print("Session is not locked")
+
 
