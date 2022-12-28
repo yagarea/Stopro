@@ -39,6 +39,7 @@ def create_new_clean_state():
     clean_state = dict()
     clean_state["log"] = list()
     clean_state["running"] = False
+    clean_state["lock"] = {"is_locked": False, "locked_for": 0, "locked_since": 0}
     write_yaml(clean_state, STATE_PATH)
     return clean_state
 
@@ -51,8 +52,7 @@ def get_state():
         return create_new_clean_state()
 
 
-def log_activity():
-    state = get_state()
+def log_activity(state):
     if state["running"]:                        # is running
         state["running"] = False
         if len(state["log"]) > 0:

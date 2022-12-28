@@ -1,6 +1,6 @@
 from rich.panel import Panel
 from utils import get_state
-from stats import get_session_durations, format_second, get_longest_session
+from stats import format_second, get_longest_session, get_total_time
 
 class Achievement:
 
@@ -30,7 +30,7 @@ class Achievement:
 
 
     def get_level_color(self):
-        return ("grey","white","green","magenta","blue","yellow","red")[self.level]
+        return ("grey37","orange4","green","magenta","blue","yellow","red")[self.level]
 
 
     def get_next_level_message(self):
@@ -52,7 +52,7 @@ class TotalTimeAchievement(Achievement):
     def __init__(self):
         super().__init__("Total Time", "Total time spent in self control sessions.")
         self.level_milestones = [86400, 1209600, 2592000, 5184000, 8640000, 15552000]
-        total_time = sum([i.total_seconds() for i in get_session_durations(get_state()["log"])])
+        total_time = get_total_time(get_state()["log"])
         self.update_level(total_time)
         self.stat = format_second(total_time)
         self.next_level_message = ["1 day",
