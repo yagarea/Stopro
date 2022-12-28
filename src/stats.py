@@ -27,11 +27,16 @@ def print_session_status(is_running):
         print("Self control session is [bold red]not activated[/bold red]")
 
 
+def get_longest_session(sessions: list):
+    if len(sessions) == 0:
+        return 0
+    return max([i.total_seconds() for i in get_session_durations(sessions)])
+
 def print_global_stats(sessions: list, s_dur: list, is_running: bool):
     total_time = sum([i.total_seconds() for i in s_dur])
     session_count = (len(sessions) - (1 if is_running else 0))
     avg_time = total_time / session_count if session_count > 0 else 0
-    longest_session = 0 if len(s_dur) == 0 else max([i.total_seconds() for i in s_dur])
+    longest_session = get_longest_session(sessions)
 
     print_session_status(is_running)
 
