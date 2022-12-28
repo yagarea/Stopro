@@ -3,6 +3,9 @@ from os import environ
 from subprocess import call
 from stats import *
 from rich import print
+from rich.console import Console
+from rich.columns import Columns
+from achievments import get_achievements
 
 
 def cmd_start(arguments, config):
@@ -33,6 +36,11 @@ def cmd_stats(arguments, config):
     s_dur = get_session_durations(state["log"])
     print_global_stats(state["log"], s_dur, state["running"])
 
+    print("\n", end="")
+
+    console = Console()
+    console.print(Columns(get_achievements(), equal=True, expand=True))
+
 
 def cmd_config(arguments, config):
     editor = environ.get("$EDITOR", "/usr/bin/vim")
@@ -56,5 +64,4 @@ def cmd_status(arguments, config):
     print_session_status(state["running"])
     if state["running"]:
         print(format_second(get_duration_of_ongoing_session(state["log"])))
-
 
