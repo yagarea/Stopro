@@ -32,8 +32,9 @@ def get_longest_session(sessions: list):
         return 0
     return max([i.total_seconds() for i in get_session_durations(sessions)])
 
+
 def print_global_stats(sessions: list, s_dur: list, is_running: bool):
-    total_time = sum([i.total_seconds() for i in s_dur])
+    total_time = get_total_time(sessions)
     session_count = (len(sessions) - (1 if is_running else 0))
     avg_time = total_time / session_count if session_count > 0 else 0
     longest_session = get_longest_session(sessions)
@@ -49,3 +50,7 @@ def print_global_stats(sessions: list, s_dur: list, is_running: bool):
 def get_duration_of_ongoing_session(log):
     current_session_start = log[-1][0]
     return (datetime.now() - parser.parse(current_session_start)).total_seconds()
+
+
+def get_total_time(log):
+    return sum([i.total_seconds() for i in get_session_durations(log)])
