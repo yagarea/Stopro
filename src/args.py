@@ -21,6 +21,13 @@ def get_args():
             action="store_true",
             help="silent mode")
 
+    parser_start.add_argument(
+            "-l", "--lock",
+            dest="locked_for",
+            required=False,
+            default="",
+            help="lock session for specified time. (30m, 4h, 1d)")
+
     parser_stop = command_parser.add_parser(
             "stop",
             help="stop self control session")
