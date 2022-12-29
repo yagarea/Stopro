@@ -42,13 +42,12 @@ def cmd_stop(arguments, config):
 
 def cmd_stats(arguments, config):
     state = get_state()
-    s_dur = get_session_durations(state["log"])
-    print_global_stats(state["log"], s_dur, state["running"])
+    print_global_stats(state)
 
     print("\n", end="")
 
     console = Console()
-    console.print(Columns(get_achievements(), equal=True, expand=True))
+    console.print(Columns(get_achievements(config), equal=True, expand=True))
 
 
 def cmd_config(arguments, config):
@@ -70,7 +69,7 @@ def cmd_clear_history(arguments, config):
 
 def cmd_status(arguments, config):
     state = get_state()
-    print_session_status(state["running"])
+    print_session_status(state)
     if not state["running"]:
         return
     print(format_second(get_duration_of_ongoing_session(state["log"])))
