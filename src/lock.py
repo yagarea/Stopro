@@ -5,7 +5,7 @@ from rich.progress import Progress, BarColumn, TimeRemainingColumn
 from time import sleep
 
 
-def lock(state ,for_how_long):
+def lock(state, for_how_long):
     state["lock"]["is_locked"] = True
     state["lock"]["locked_since"] = datetime.now().isoformat()
     state["lock"]["locked_for"] = for_how_long
@@ -57,3 +57,5 @@ def parse_lock_time(raw_time):
 def get_remaining_time(state):
     can_be_open_after = parser.parse(state["lock"]["locked_since"]) + timedelta(seconds=state["lock"]["locked_for"])
     return  (can_be_open_after - datetime.now()).total_seconds()
+
+
