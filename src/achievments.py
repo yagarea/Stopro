@@ -79,9 +79,28 @@ class LongestSessionAchievement(Achievement):
                                    "2 weeks"]
 
 
-def get_achievements():
+
+class ForbiddenSitesAchievement(Achievement):
+
+    def __init__(self, config):
+        super().__init__("Number of forbidden sites", "Number of sites you have blocked to enhance your self control.")
+        self.level_milestones = [5, 10, 20, 40, 60, 100]
+        longest_session = get_longest_session(get_state()["log"])
+        blocked_sites = len(config["forbidden_sites"])
+        self.update_level(blocked_sites)
+        self.stat = f"{blocked_sites} sites are blocked"
+        self.next_level_message = ["5 sites",
+                                   "10 sites",
+                                   "20 sites",
+                                   "40 sites",
+                                   "60 sites",
+                                   "100 sites"]
+
+
+def get_achievements(config):
     return [
         TotalTimeAchievement(),
-        LongestSessionAchievement()
+        LongestSessionAchievement(),
+        ForbiddenSitesAchievement(config),
         ]
 
