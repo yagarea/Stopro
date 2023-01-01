@@ -1,4 +1,4 @@
-from utils import get_state, write_yaml, STATE_PATH
+from utils import get_state, write_yaml, STATE_PATH, format_second
 from dateutil import parser
 from datetime import datetime, timedelta
 from rich.progress import Progress, BarColumn, TimeRemainingColumn
@@ -38,6 +38,17 @@ def progressbar(state):
     while not is_unlock_allowed(state):
         progress.update(task, advance=1)
         sleep(1)
+    progress.stop()
+
+
+def static_progressbar(state):
+    locked_since = parser.parse(state["lock"]["locked_since"])
+    locked_for = state["lock"]["locked_for"]
+    progress = Progress("Lock:", "[progress.percentage]{task.percentage:>3.0f}%", BarColumn(), f"{format_second(get_remaining_time(state))} remaining")
+    task = progress.add_task("Locking...", total=locked_for)
+    progress.update(task, advance=(locked_for - get_remaining_time(state)))
+    progress.start()
+    progress.update(task, advance=0)
     progress.stop()
 
 
