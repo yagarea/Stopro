@@ -16,11 +16,24 @@ distracting pages is fully configurable. This can help you focus and stop wastin
 - `config`          - opens configuration file in editor
 - `clear-history`   - remove all logs and usage history
 
+## Locking
+Self control sessions have lock mechanism. You can set any amount of time in which
+self control session can not be turn of. You set time as number and time unit.
+
+- `s` - seconds
+- `m` - minutes
+- `h` - hours
+- `d` - days
+
+Example usages:
+- `stopro start --lock 15m`
+- `stopro start --lock 1d`
 
 ## Options
 - `-s`,`--silent` - silent mode
 - `-c`,`--config` - use custom configuration file path
 - `-h`,`--help`   - shows help
+
 
 ## Configuration
 Default configuration path is `/etc/stopro/conf.yml` but you cat set your own with `-c`
