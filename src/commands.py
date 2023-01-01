@@ -72,12 +72,5 @@ def cmd_status(arguments, config):
     print_session_status(state)
     if not state["running"]:
         return
-    print(format_second(get_duration_of_ongoing_session(state["log"])))
     if state["lock"]["is_locked"] and lock.get_remaining_time(state) > 0:
-        print("Locked for: ", end="")
-        print(format_second(lock.get_remaining_time(state)))
-        lock.progressbar(state)
-    else:
-        print("Session is not locked")
-
-
+        lock.static_progressbar(state)
