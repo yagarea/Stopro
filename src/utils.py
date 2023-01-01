@@ -82,3 +82,17 @@ def forbid_sites(forbidden_sites):
             hosts.write(f"0.0.0.0 {site}\n0.0.0.0 www.{site}\n::0 {site}\n::0 www.{site}\n")
 
 
+def format_second(total_seconds: int) -> str:
+    days = total_seconds // (60 * 60 * 24)
+    hours = (total_seconds // 3600 ) % 24
+    minutes = (total_seconds // 60) % 60
+    seconds = total_seconds % 60
+    output = ""
+    if days > 0:
+        output += f"{int(days)} day{'' if days == 1 else 's'} "
+    if hours > 0:
+        output += f"{int(hours)} hour{'' if hours == 1 else 's'} "
+    if minutes > 0:
+        output += f"{int(minutes)} minute{'' if minutes == 1 else 's'} "
+    return output + f"{int(seconds)} second{'' if minutes == 1 else 's'}"
+

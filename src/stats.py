@@ -2,30 +2,16 @@ from dateutil import parser
 from datetime import timedelta, datetime
 from rich import print
 import lock
+from utils import format_second
 
 
-def get_session_durations(sessions: list):
+def get_session_durations(sessions: list) -> [float]:
     output = list()
     for session in sessions:
         if session[1] != "+":
             start, end = parser.parse(session[0]), parser.parse(session[1])
             output.append((end - start))
     return output
-
-
-def format_second(total_seconds: int):
-    days = total_seconds // (60 * 60 * 24)
-    hours = (total_seconds // 3600 ) % 24
-    minutes = (total_seconds // 60) % 60
-    seconds = total_seconds % 60
-    output = ""
-    if days > 0:
-        output += f"{int(days)} day{'' if days == 1 else 's'} "
-    if hours > 0:
-        output += f"{int(hours)} hour{'' if hours == 1 else 's'} "
-    if minutes > 0:
-        output += f"{int(minutes)} minute{'' if minutes == 1 else 's'} "
-    return output + f"{int(seconds)} second{'' if minutes == 1 else 's'}"
 
 
 def print_session_status(state):
@@ -67,11 +53,10 @@ def get_total_time(log):
     return sum([i.total_seconds() for i in get_session_durations(log)])
 
 
-
 def print_lock_status(state):
     if lock.is_locked():
         if not lock.is_unlock_allowed(state):
-            print(f"This session is locked. ({format_second(lock.get_remaining_time(state))} remaining)")
+            print(f"This session is locked. ({format_second(state['lock']['locked_for'])})")
             return
     print(f"This session is not locked")
 
