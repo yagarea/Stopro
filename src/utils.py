@@ -52,6 +52,10 @@ def get_state():
         return create_new_clean_state()
 
 
+def save_state(state):
+    write_yaml(state, STATE_PATH)
+
+
 def log_activity(state):
     if state["running"]:                        # is running
         state["running"] = False
