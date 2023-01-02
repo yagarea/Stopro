@@ -43,6 +43,16 @@ def get_args():
             "status",
             help="print info about current session")
 
+    parser_lock = command_parser.add_parser(
+            "lock",
+            help="lock ongoing session for specified time")
+
+    parser_lock.add_argument(
+            "locked_for",
+            action="store",
+            type=str,
+            help="lock session for specified time. (30m, 4h, 1d)")
+
     parser_config = command_parser.add_parser(
             "config",
             help="opens configuration file in editor")
