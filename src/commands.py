@@ -40,6 +40,19 @@ def cmd_stop(arguments, config):
         print("No self control session is currently running")
 
 
+def cmd_lock(arguments, config):
+    state = get_state()
+    if not state["running"]:
+        print("No self control session is currently running")
+        return
+    if state["lock"]["is_locked"]:
+        print("This session is already locked")
+        return
+    time_in_seconds = lock.parse_lock_time(arguments.locked_for)
+    state = lock.lock(state, time_in_seconds)
+    save_state(state)
+
+
 def cmd_stats(arguments, config):
     state = get_state()
     print_global_stats(state)
