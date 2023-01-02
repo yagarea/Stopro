@@ -88,11 +88,17 @@ def format_second(total_seconds: int) -> str:
     minutes = (total_seconds // 60) % 60
     seconds = total_seconds % 60
     output = ""
+
+    if total_seconds == 0:
+        return "0 seconds"
+
     if days > 0:
         output += f"{int(days)} day{'' if days == 1 else 's'} "
     if hours > 0:
         output += f"{int(hours)} hour{'' if hours == 1 else 's'} "
     if minutes > 0:
         output += f"{int(minutes)} minute{'' if minutes == 1 else 's'} "
-    return output + f"{int(seconds)} second{'' if minutes == 1 else 's'}"
+    if seconds > 0:
+        output += f"{int(seconds)} second{'' if seconds == 1 else 's'}"
+    return output.strip()
 
