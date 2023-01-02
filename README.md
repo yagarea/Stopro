@@ -11,6 +11,7 @@ distracting pages is fully configurable. This can help you focus and stop wastin
 ## Commands
 - `start`           - starts self control session
 - `stop`            - stops self control session
+- `lock`            - lock ongoing self control session
 - `status`          - print info about current session
 - `stats`           - print statistics about usage and time saving
 - `config`          - opens configuration file in editor
@@ -28,6 +29,8 @@ self control session can not be turn of. You set time as number and time unit.
 Example usages:
 - `stopro start --lock 15m`
 - `stopro start --lock 1d`
+- `stopro lock 30m`
+- `stopro lock 3h`
 
 ## Options
 - `-s`,`--silent` - silent mode
@@ -51,11 +54,6 @@ forbidden_sites:
   - reddit.com
   - netflix.com
 ```
-
-## Planned
-- real time updating status
-- locking mechanism
-- draw charts
 
 ## About
 If you find any bug please create issue. Same goes for feature requests. I am also open
