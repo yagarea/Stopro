@@ -30,7 +30,7 @@ def get_longest_session(sessions: list):
 
 
 def print_global_stats(state):
-    total_time = get_total_time(state["log"])
+    total_time = get_total_time(state)
     session_count = (len(state["log"]) - (1 if state["running"] else 0))
     avg_time = total_time / session_count if session_count > 0 else 0
     longest_session = get_longest_session(state["log"])
@@ -49,8 +49,9 @@ def get_duration_of_ongoing_session(log):
     return (datetime.now() - parser.parse(current_session_start)).total_seconds()
 
 
-def get_total_time(log):
-    return sum([i.total_seconds() for i in get_session_durations(log)])
+def get_total_time(state):
+    return sum([i.total_seconds() for i in get_session_durations(state["log"])]) + (
+            get_duration_of_ongoing_session(state["log"]) if state["running"] else 0)
 
 
 def print_lock_status(state):
