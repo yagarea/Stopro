@@ -45,7 +45,7 @@ def cmd_lock(arguments, config):
     if not state["running"]:
         print("No self control session is currently running")
         return
-    if state["lock"]["is_locked"]:
+    if state["lock"]["is_locked"] and lock.get_remaining_time(state) > 0:
         print("This session is already locked")
         return
     time_in_seconds = lock.parse_lock_time(arguments.locked_for)
