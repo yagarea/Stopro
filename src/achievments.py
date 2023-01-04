@@ -52,7 +52,7 @@ class TotalTimeAchievement(Achievement):
     def __init__(self):
         super().__init__("Total Time", "Total time spent in self control sessions.")
         self.level_milestones = [86400, 1209600, 2592000, 5184000, 8640000, 15552000]
-        total_time = get_total_time(get_state()["log"])
+        total_time = get_total_time(get_state())
         self.update_level(total_time)
         self.stat = format_second(total_time)
         self.next_level_message = ["1 day",
@@ -83,8 +83,8 @@ class LongestSessionAchievement(Achievement):
 class ForbiddenSitesAchievement(Achievement):
 
     def __init__(self, config):
-        super().__init__("Number of forbidden sites", "Number of sites you have blocked to enhance your self control.")
-        self.level_milestones = [5, 10, 20, 40, 60, 100]
+        super().__init__("Number of forbidden sites", "Number of sites you have blocked.")
+        self.level_milestones = [5, 10, 20, 30, 40, 50]
         longest_session = get_longest_session(get_state()["log"])
         blocked_sites = len(config["forbidden_sites"])
         self.update_level(blocked_sites)
@@ -92,9 +92,9 @@ class ForbiddenSitesAchievement(Achievement):
         self.next_level_message = ["5 sites",
                                    "10 sites",
                                    "20 sites",
+                                   "30 sites",
                                    "40 sites",
-                                   "60 sites",
-                                   "100 sites"]
+                                   "50 sites"]
 
 
 def get_achievements(config):
