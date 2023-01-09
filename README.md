@@ -32,6 +32,11 @@ Example usages:
 - `stopro lock 30m`
 - `stopro lock 3h`
 
+## Stats and achievements
+You can measure your work ethic with statistics and challenge your self with achievements.
+
+![Stats](https://jc.ggu.cz/files/stopro-screenshot.png)
+
 ## Options
 - `-s`,`--silent` - silent mode
 - `-c`,`--config` - use custom configuration file path
