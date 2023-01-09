@@ -39,7 +39,7 @@ def create_new_clean_state():
     clean_state = dict()
     clean_state["log"] = list()
     clean_state["running"] = False
-    clean_state["lock"] = {"is_locked": False, "locked_for": 0, "locked_since": 0}
+    clean_state["lock"] = {"is_locked": False, "locked_for": 0, "locked_since": 0, "total_time_locked": 0}
     write_yaml(clean_state, STATE_PATH)
     return clean_state
 
