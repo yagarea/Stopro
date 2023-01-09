@@ -54,6 +54,7 @@ def cmd_lock(arguments, config):
 
 
 def cmd_stats(arguments, config):
+    cmd_status(arguments, config)
     state = get_state()
     print_global_stats(state)
 

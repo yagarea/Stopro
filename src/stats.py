@@ -26,7 +26,7 @@ def print_session_status(state):
 def get_longest_session(sessions: list):
     if len(sessions) == 0:
         return 0
-    return max([i.total_seconds() for i in get_session_durations(sessions)])
+    return max(max([i.total_seconds() for i in get_session_durations(sessions)]), get_duration_of_ongoing_session(sessions))
 
 
 def print_global_stats(state):
@@ -35,9 +35,7 @@ def print_global_stats(state):
     avg_time = total_time / session_count if session_count > 0 else 0
     longest_session = get_longest_session(state["log"])
 
-    print_session_status(state)
     print("")
-
     print(f"[bold]Total time:[/bold]\t{format_second(total_time)}")
     print(f"[bold]Average time:[/bold]\t{format_second(avg_time)}")
     print(f"[bold]Total sessions:[/bold]\t{session_count}")
@@ -60,5 +58,9 @@ def print_lock_status(state):
             print(f"This session is locked. ({format_second(state['lock']['locked_for'])})")
             return
     print(f"This session is not locked")
+
+
+def get_total_time_locked(state):
+    return state["lock"]["total_time_locked"]
 
 
