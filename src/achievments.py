@@ -1,6 +1,6 @@
 from rich.panel import Panel
 from utils import get_state
-from stats import format_second, get_longest_session, get_total_time
+from stats import format_second, get_longest_session, get_total_time, get_total_time_locked
 
 class Achievement:
 
@@ -50,7 +50,7 @@ class Achievement:
 class TotalTimeAchievement(Achievement):
 
     def __init__(self):
-        super().__init__("Total Time", "Total time spent in self control sessions.")
+        super().__init__("Stoic", "Total time spent in self control sessions.")
         self.level_milestones = [86400, 1209600, 2592000, 5184000, 8640000, 15552000]
         total_time = get_total_time(get_state())
         self.update_level(total_time)
@@ -66,7 +66,7 @@ class TotalTimeAchievement(Achievement):
 class LongestSessionAchievement(Achievement):
 
     def __init__(self):
-        super().__init__("Longest Session", "The longest time you have spend in self control session.")
+        super().__init__("Marathonist", "The longest time you have spend in self control session.")
         self.level_milestones = [14400, 28800, 57600, 86400, 604800,1209600]
         longest_session = get_longest_session(get_state()["log"])
         self.update_level(longest_session)
@@ -83,7 +83,7 @@ class LongestSessionAchievement(Achievement):
 class ForbiddenSitesAchievement(Achievement):
 
     def __init__(self, config):
-        super().__init__("Number of forbidden sites", "Number of sites you have blocked.")
+        super().__init__("Ascetic", "Number of sites you have blocked.")
         self.level_milestones = [5, 10, 20, 30, 40, 50]
         longest_session = get_longest_session(get_state()["log"])
         blocked_sites = len(config["forbidden_sites"])
@@ -97,10 +97,27 @@ class ForbiddenSitesAchievement(Achievement):
                                    "50 sites"]
 
 
+class TotalLockedTime(Achievement):
+
+    def __init__(self):
+        super().__init__("Totalitarian", "Total time spend locked in self control session.")
+        self.level_milestones = [86400, 1209600, 2592000, 5184000, 8640000, 15552000]
+        total_time = get_total_time_locked(get_state())
+        self.update_level(total_time)
+        self.stat = format_second(total_time)
+        self.next_level_message = ["1 day",
+                                   "14 days",
+                                   "30 days",
+                                   "60 days",
+                                   "100 days",
+                                   "180 days"]
+
+
 def get_achievements(config):
     return [
         TotalTimeAchievement(),
         LongestSessionAchievement(),
         ForbiddenSitesAchievement(config),
+        TotalLockedTime()
         ]
 
