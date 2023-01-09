@@ -9,6 +9,7 @@ def lock(state, for_how_long):
     state["lock"]["is_locked"] = True
     state["lock"]["locked_since"] = datetime.now().isoformat()
     state["lock"]["locked_for"] = for_how_long
+    state["lock"]["total_locked_time"] += for_how_long
     return state
 
 
