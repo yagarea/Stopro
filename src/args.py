@@ -8,10 +8,15 @@ def get_args():
             description="Simple utility for productivity and will training.",
             epilog="If you find any bug or have feature suggestion you can open issue in project repository: github.com/yagarea/Stopro\r\rPublished under GPLv3 license")
 
+    arg_parser.add_argument("-d", "--debug",
+            action="store_true",
+            dest="debug",
+            help="Print debug information")
+
     command_parser = arg_parser.add_subparsers(title="commands", dest="command", required=True)
 
     parser_start = command_parser.add_parser(
-            "start", 
+            "start",
             help="start self control session")
 
     parser_start.add_argument(
@@ -64,6 +69,10 @@ def get_args():
     parser_clear_history = command_parser.add_parser(
             "clear-history",
             help="remove all logs and usage history")
+
+    parser_verion = command_parser.add_parser(
+            "version",
+            help="print version of StoPro")
 
     arg_parser.add_argument(
             "-s", "--silent",
