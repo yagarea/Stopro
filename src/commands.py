@@ -26,9 +26,9 @@ def cmd_start(arguments, config):
 
 
 def cmd_stop(arguments, config):
-    state = get_state()
+    state = get_state(debug=arguments.debug)
     if state["running"]:
-        if not lock.is_unlock_allowed(state):
+        if not lock.is_unlock_allowed(state, arguments.debug):
             print("This session is locked. You can not stop it.")
             return
         apply_backup()

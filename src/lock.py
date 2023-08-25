@@ -2,6 +2,7 @@ from utils import get_state, write_yaml, STATE_PATH, format_second
 from dateutil import parser
 from datetime import datetime, timedelta
 from rich.progress import Progress, BarColumn, TimeRemainingColumn
+from rich import print
 from time import sleep
 
 
@@ -24,7 +25,14 @@ def is_locked():
     return get_state()["lock"]["is_locked"]
 
 
-def is_unlock_allowed(state):
+def is_unlock_allowed(state, debug=False):
+    if debug:
+        print(f"DEBUG:\tLocked since: {state['lock']['locked_since']}")
+        print(f"DEBUG:\tLocked for: {state['lock']['locked_for']}")
+        print(f"DEBUG:\tTotal time locked: {state['lock']['total_time_locked']}")
+        print(f"DEBUG:\tIs locked: {state['lock']['is_locked']}")
+    if not state["lock"]["is_locked"]:
+        return True
     can_be_open_after = parser.parse(state["lock"]["locked_since"]) + timedelta(seconds=state["lock"]["locked_for"])
     return datetime.now() > can_be_open_after
 

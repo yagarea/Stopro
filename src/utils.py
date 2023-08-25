@@ -5,15 +5,19 @@ from datetime import datetime
 import yaml
 from functools import cache
 
+
 STATE_PATH = "/usr/share/stopro/state.yml"
 
 # Basics
 
 # load yaml file to dictionary
-def load_yaml(yaml_path):
+def load_yaml(yaml_path, debug=False):
     try:
         with open(yaml_path, 'r') as stream:
             raw_yaml = yaml.safe_load(stream)
+            if debug:
+                print(f"Loaded yaml from {yaml_path}")
+                print(raw_yaml)
             return raw_yaml
     except yaml.YAMLError:
         print(f"Yaml parse of {yaml_path} failed\nPlease check syntax")
@@ -45,9 +49,9 @@ def create_new_clean_state():
 
 # load stopro state
 @cache
-def get_state():
+def get_state(debug=False):
     if path.isfile(STATE_PATH):
-        return load_yaml(STATE_PATH)
+        return load_yaml(STATE_PATH, debug)
     else:
         return create_new_clean_state()
 
