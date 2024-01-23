@@ -25,6 +25,8 @@ def is_locked():
 
 
 def is_unlock_allowed(state):
+    if not is_locked():
+        return True
     can_be_open_after = parser.parse(state["lock"]["locked_since"]) + timedelta(seconds=state["lock"]["locked_for"])
     return datetime.now() > can_be_open_after
 
