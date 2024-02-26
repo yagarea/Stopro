@@ -4,6 +4,7 @@ from os import path
 from datetime import datetime
 import yaml
 from functools import cache
+from rich import print
 
 
 STATE_PATH = "/usr/share/stopro/state.yml"
@@ -20,10 +21,10 @@ def load_yaml(yaml_path, debug=False):
                 print(raw_yaml)
             return raw_yaml
     except yaml.YAMLError:
-        print(f"Yaml parse of {yaml_path} failed\nPlease check syntax")
+        print_error(f"Yaml parse of {yaml_path} failed\nPlease check syntax")
         exit(1)
     except IOError:
-        print(f"File {yaml_path} does not exists")
+        print_error(f"File {yaml_path} does not exists")
         exit(1)
 
 
@@ -32,10 +33,10 @@ def write_yaml(yaml_content, file_path):
         with open(file_path, "w") as yaml_file:
             yaml_file.write(yaml.dump(yaml_content))
     except yaml.YAMLError:
-        print_error(f"Yaml parse of {yaml_path} failed\nPlease check syntax")
+        print_error(f"Yaml parse of {file_path} failed\nPlease check syntax")
         exit(1)
     except IOError:
-        print_error(f"Error occurred while writing to {yaml_path}")
+        print_error(f"Error occurred while writing to {file_path}")
         exit(1)
 
 # create new clean state
@@ -110,3 +111,6 @@ def format_second(total_seconds: int) -> str:
         output += f"{int(seconds)} second{'' if seconds == 1 else 's'}"
     return output.strip()
 
+
+def print_error(message):
+    print(f"[bold red]ERROR:[/bold red]\t{message}")
