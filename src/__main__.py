@@ -5,6 +5,10 @@ from commands import *
 from args import get_args
 
 
+
+DEBUG = False
+
+
 def check_root():
     if geteuid() != 0:
         print("You need root permission")
@@ -31,6 +35,9 @@ def main():
         cmd_stats(arguments, config)
     elif arguments.command == "clear-history":
         cmd_clear_history(arguments, config)
+    elif arguments.command == "version":
+        from version import __version__
+        print(__version__)
 
 
 if __name__ == "__main__":
