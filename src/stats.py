@@ -26,6 +26,8 @@ def print_session_status(state):
 def get_longest_session(sessions: list):
     if len(sessions) == 0:
         return 0
+    elif len(sessions) == 1:
+        return get_duration_of_ongoing_session(sessions)
     return max(max([i.total_seconds() for i in get_session_durations(sessions)]), get_duration_of_ongoing_session(sessions))
 
 
