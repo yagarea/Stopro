@@ -9,9 +9,7 @@ from rich import print
 
 STATE_PATH = "/usr/share/stopro/state.yml"
 
-# Basics
-
-# load yaml file to dictionary
+# Load yaml file to dictionary
 def load_yaml(yaml_path, debug=False):
     try:
         with open(yaml_path, 'r') as stream:
@@ -28,6 +26,7 @@ def load_yaml(yaml_path, debug=False):
         exit(1)
 
 
+# Save dictionary to yaml file
 def write_yaml(yaml_content, file_path):
     try:
         with open(file_path, "w") as yaml_file:
@@ -39,12 +38,16 @@ def write_yaml(yaml_content, file_path):
         print_error(f"Error occurred while writing to {file_path}")
         exit(1)
 
+
 # create new clean state
 def create_new_clean_state():
     clean_state = dict()
     clean_state["log"] = list()
     clean_state["running"] = False
-    clean_state["lock"] = {"is_locked": False, "locked_for": 0, "locked_since": 0, "total_time_locked": 0}
+    clean_state["lock"] = {"is_locked": False,
+                           "locked_for": 0,
+                           "locked_since": 0,
+                           "total_time_locked": 0}
     write_yaml(clean_state, STATE_PATH)
     return clean_state
 
@@ -56,11 +59,12 @@ def get_state(debug=False):
     else:
         return create_new_clean_state()
 
-
+# save stopro state
 def save_state(state):
     write_yaml(state, STATE_PATH)
 
 
+# Write current state to state file
 def log_activity(state):
     if state["running"]:                        # is running
         state["running"] = False
@@ -80,10 +84,12 @@ def backup_hosts():
     copy2("/etc/hosts", "/etc/hosts.stopro_backup", follow_symlinks=True)
 
 
+# Apply backup hosts file
 def apply_backup():
     call("mv /etc/hosts.stopro_backup /etc/hosts", shell=True)
 
 
+# Forbid sites by adding rules to /etc/hosts
 def forbid_sites(forbidden_sites):
     with open("/etc/hosts", "a") as hosts:
         hosts.write("\n\n# SELF CONTROL\n")
@@ -91,6 +97,7 @@ def forbid_sites(forbidden_sites):
             hosts.write(f"0.0.0.0 {site}\n0.0.0.0 www.{site}\n::0 {site}\n::0 www.{site}\n")
 
 
+# Format total seconds to human readable format
 def format_second(total_seconds: int) -> str:
     days = total_seconds // (60 * 60 * 24)
     hours = (total_seconds // 3600 ) % 24
@@ -112,5 +119,7 @@ def format_second(total_seconds: int) -> str:
     return output.strip()
 
 
+# Print error message
 def print_error(message):
     print(f"[bold red]ERROR:[/bold red]\t{message}")
+

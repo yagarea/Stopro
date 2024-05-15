@@ -9,8 +9,10 @@ from achievments import get_achievements
 import lock
 
 
+
+# start command
 def cmd_start(arguments, config):
-    state = get_state()
+    state = get_state(debug=arguments.debug)
     if state["running"]:
         print("A self control session is already in progress")
     else:
@@ -25,6 +27,7 @@ def cmd_start(arguments, config):
         log_activity(state)
 
 
+# stop command
 def cmd_stop(arguments, config):
     state = get_state(debug=arguments.debug)
     if state["running"]:
@@ -40,8 +43,9 @@ def cmd_stop(arguments, config):
         print("No self control session is currently running")
 
 
+# lock command
 def cmd_lock(arguments, config):
-    state = get_state()
+    state = get_state(debug=arguments.debug)
     if not state["running"]:
         print("No self control session is currently running")
         return
@@ -53,9 +57,10 @@ def cmd_lock(arguments, config):
     save_state(state)
 
 
+# statistics command
 def cmd_stats(arguments, config):
     cmd_status(arguments, config)
-    state = get_state()
+    state = get_state(debug=arguments.debug)
     print_global_stats(state)
 
     print("\n", end="")
@@ -64,13 +69,15 @@ def cmd_stats(arguments, config):
     console.print(Columns(get_achievements(config), equal=True, expand=True))
 
 
+# config command
 def cmd_config(arguments, config):
     editor = environ.get("$EDITOR", "/usr/bin/vim")
     call([editor, arguments.config_path])
 
 
+# clear command
 def cmd_clear_history(arguments, config):
-    state = get_state()
+    state = get_state(debug=arguments.debug)
     if state["running"]:
         print("You can not clear history during self control session. To continue stop current session and try again.")
     else:
@@ -81,10 +88,12 @@ def cmd_clear_history(arguments, config):
             print("History was successfully deleted")
 
 
+# status command
 def cmd_status(arguments, config):
-    state = get_state()
+    state = get_state(debug=arguments.debug)
     print_session_status(state)
     if not state["running"]:
         return
     if state["lock"]["is_locked"] and lock.get_remaining_time(state) > 0:
         lock.static_progressbar(state)
+
