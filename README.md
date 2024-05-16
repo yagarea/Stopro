@@ -8,6 +8,7 @@ Stopro is simple utility which will help you with self control and build work et
 When you activate *self control session* all distracting pages will be blocked. List of
 distracting pages is fully configurable. This can help you focus and stop wasting time.
 
+
 ## Commands
 - `start`           - starts self control session
 - `stop`            - stops self control session
@@ -16,6 +17,7 @@ distracting pages is fully configurable. This can help you focus and stop wastin
 - `stats`           - print statistics about usage and time saving
 - `config`          - opens configuration file in editor
 - `clear-history`   - remove all logs and usage history
+
 
 ## Locking
 Self control sessions have lock mechanism. You can set any amount of time in which
@@ -31,6 +33,7 @@ Example usages:
 - `stopro start --lock 1d`
 - `stopro lock 30m`
 - `stopro lock 3h`
+
 
 ## Stats and achievements
 You can measure your work ethic with statistics and challenge your self with achievements.
@@ -64,4 +67,4 @@ forbidden_sites:
 If you find any bug please create issue. Same goes for feature requests. I am also open
 to pull requests.
 
-Published under GPLv3 license.
+Published under [GPLv3 license](https://www.gnu.org/licenses/gpl-3.0.en.html).
