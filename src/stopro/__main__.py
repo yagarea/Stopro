@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 from os import geteuid, path, chdir
-from commands import *
-from args import get_args
+from .commands import *
+from .args import get_args
 
 
 
@@ -36,7 +36,7 @@ def main():
     elif arguments.command == "clear-history":
         cmd_clear_history(arguments, config)
     elif arguments.command == "version":
-        from version import __version__
+        from .version import __version__
         print(__version__)
 
 

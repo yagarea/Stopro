@@ -1,12 +1,12 @@
-from utils import *
+from .utils import *
 from os import environ
 from subprocess import call
-from stats import *
+from .stats import *
 from rich import print
 from rich.console import Console
 from rich.columns import Columns
-from achievments import get_achievements
-import lock
+from .achievments import get_achievements
+from . import lock
 
 
 

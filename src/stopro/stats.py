@@ -1,8 +1,8 @@
 from dateutil import parser
 from datetime import timedelta, datetime
 from rich import print
-import lock
-from utils import format_second
+from . import lock
+from .utils import format_second
 
 
 # Get list of durations of all sessions

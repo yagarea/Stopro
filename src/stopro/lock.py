@@ -1,4 +1,4 @@
-from utils import get_state, write_yaml, STATE_PATH, format_second
+from .utils import get_state, write_yaml, STATE_PATH, format_second
 from dateutil import parser
 from datetime import datetime, timedelta
 from rich.progress import Progress, BarColumn, TimeRemainingColumn

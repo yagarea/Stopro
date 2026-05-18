@@ -1,6 +1,6 @@
 from rich.panel import Panel
-from utils import get_state
-from stats import format_second, get_longest_session, get_total_time, get_total_time_locked
+from .utils import get_state
+from .stats import format_second, get_longest_session, get_total_time, get_total_time_locked
 
 class Achievement:
 
