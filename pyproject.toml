@@ -7,7 +7,7 @@ name = "stopro"
 version = "0.0.1"
 description = "A simple utility which will help you with self control and build work ethic."
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.13"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [
@@ -26,13 +26,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "commonmark",
-    "pyaml",
-    "Pygments",
     "python-dateutil",
     "PyYAML",
     "rich",
-    "six",
 ]
 
 [project.urls]
