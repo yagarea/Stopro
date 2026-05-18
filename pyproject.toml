@@ -1,0 +1,42 @@
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"
+
+[project]
+name = "stopro"
+version = "0.0.1"
+description = "A simple utility which will help you with self control and build work ethic."
+readme = "README.md"
+requires-python = ">=3.8"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [
+    {name = "Jan Černý", email = "cerny@matfyz.cz"},
+]
+keywords = [
+    "self control",
+    "work ethic",
+    "focus",
+    "distraction",
+    "productivity",
+    "mental health",
+]
+classifiers = [
+    "Environment :: Console",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "commonmark",
+    "pyaml",
+    "Pygments",
+    "python-dateutil",
+    "PyYAML",
+    "rich",
+    "six",
+]
+
+[project.urls]
+Homepage = "https://github.com/yagarea/Stopro"
+
+[project.scripts]
+stopro = "stopro.__main__:main"
