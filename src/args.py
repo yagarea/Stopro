@@ -4,7 +4,7 @@ import argparse
 
 
 def get_args():
-    arg_parser = argparse.ArgumentParser("StoPro",
+    arg_parser = argparse.ArgumentParser("stopro",
             description="Simple utility for productivity and will training.",
             epilog="If you find any bug or have feature suggestion you can open issue in project repository: github.com/yagarea/Stopro\r\rPublished under GPLv3 license")
 
