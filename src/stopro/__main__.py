@@ -36,8 +36,8 @@ def main():
     elif arguments.command == "clear-history":
         cmd_clear_history(arguments, config)
     elif arguments.command == "version":
-        from .version import __version__
-        print(__version__)
+        from importlib.metadata import version
+        print(version("stopro"))
 
 
 if __name__ == "__main__":
