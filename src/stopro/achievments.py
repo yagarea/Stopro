@@ -9,8 +9,8 @@ class Achievement:
         self.description: str = description
         self.level: int = 0
         self.level_milestones: list[int]
-        self.stat: str = None
-        self.next_level_message: str = None
+        self.stat: str
+        self.next_level_message: list[str]
 
 
     def __rich__(self):

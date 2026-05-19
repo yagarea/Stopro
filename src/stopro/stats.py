@@ -6,7 +6,7 @@ from .utils import format_second
 
 
 # Get list of durations of all sessions
-def get_session_durations(sessions: list) -> [float]:
+def get_session_durations(sessions: list) -> list[timedelta]:
     output = list()
     for session in sessions:
         if session[1] != "+":

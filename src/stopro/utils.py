@@ -98,7 +98,7 @@ def forbid_sites(forbidden_sites):
 
 
 # Format total seconds to human readable format
-def format_second(total_seconds: int) -> str:
+def format_second(total_seconds: float) -> str:
     days = total_seconds // (60 * 60 * 24)
     hours = (total_seconds // 3600 ) % 24
     minutes = (total_seconds // 60) % 60
