@@ -1,6 +1,7 @@
 from .utils import *
 from os import environ
 from subprocess import call
+import shlex
 from .stats import *
 from rich import print
 from rich.console import Console
@@ -71,8 +72,12 @@ def cmd_stats(arguments, config):
 
 # config command
 def cmd_config(arguments, config):
-    editor = environ.get("$EDITOR", "/usr/bin/vim")
-    call([editor, arguments.config_path])
+    editor = environ.get("EDITOR") or "/usr/bin/vim"
+    try:
+        call(shlex.split(editor) + [arguments.config_path])
+    except OSError as error:
+        print_error(f"Could not start editor '{editor}'\n{error}")
+        exit(1)
 
 
 # clear command
