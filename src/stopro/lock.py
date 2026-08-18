@@ -6,6 +6,27 @@ from rich import print
 from time import sleep
 
 
+UNIT_MULTIPLIERS = {
+    "s": 1,
+    "m": 60,
+    "h": 60 * 60,
+    "d": 60 * 60 * 24,
+}
+
+
+class InvalidLockTime(Exception):
+    """Raised when a lock time string can not be parsed."""
+
+    def __init__(self, value):
+        self.value = value
+        super().__init__(
+            f"'{value}' is not a valid lock time.\n"
+            "Use a whole number optionally followed by a unit: "
+            "s (seconds), m (minutes), h (hours) or d (days).\n"
+            "For example: 30s, 5m, 2h or 1d."
+        )
+
+
 def lock(state, for_how_long):
     state["lock"]["is_locked"] = True
     state["lock"]["locked_since"] = datetime.now().isoformat()
@@ -62,16 +83,18 @@ def static_progressbar(state):
 
 
 def parse_lock_time(raw_time):
-        if raw_time.endswith("s"):
-            return int(raw_time[:-1])
-        elif raw_time.endswith("m"):
-            return int(raw_time[:-1]) * 60
-        elif raw_time.endswith("h"):
-            return int(raw_time[:-1]) * 60 * 60
-        elif raw_time.endswith("d"):
-            return int(raw_time[:-1]) * 60 * 60 * 24
-        else:
-            return int(raw_time)
+    value = raw_time.strip()
+    multiplier = 1
+    if value and value[-1] in UNIT_MULTIPLIERS:
+        multiplier = UNIT_MULTIPLIERS[value[-1]]
+        value = value[:-1]
+    try:
+        seconds = int(value)
+    except ValueError:
+        raise InvalidLockTime(raw_time)
+    if seconds < 0:
+        raise InvalidLockTime(raw_time)
+    return seconds * multiplier
 
 
 def get_remaining_time(state):
