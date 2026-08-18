@@ -17,7 +17,11 @@ def check_root():
 
 def main():
     arguments = get_args()
-    config = load_yaml(arguments.config_path)
+    # Only "start" and "stats" read the config, so the other commands must not
+    # fail when it is missing or unparsable.
+    config = None
+    if arguments.command in ("start", "stats"):
+        config = load_yaml(arguments.config_path)
     if arguments.command == "start":
         check_root()
         cmd_start(arguments, config)
