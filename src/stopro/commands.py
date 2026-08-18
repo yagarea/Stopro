@@ -11,21 +11,33 @@ from . import lock
 
 
 
+def print_invalid_lock_time(error):
+    print(f"[bold red]Error:[/bold red] {error}")
+
+
 # start command
 def cmd_start(arguments, config):
     state = get_state(debug=arguments.debug)
     if state["running"]:
         print("A self control session is already in progress")
-    else:
-        backup_hosts()
-        forbid_sites(config["forbidden_sites"])
-        if not arguments.silent_mode:
-            print("Your self control session [bold green]started[/bold green]")
+        return
 
-        if arguments.locked_for != "":
+    time_in_seconds = None
+    if arguments.locked_for != "":
+        try:
             time_in_seconds = lock.parse_lock_time(arguments.locked_for)
-            state = lock.lock(state, time_in_seconds)
-        log_activity(state)
+        except lock.InvalidLockTime as error:
+            print_invalid_lock_time(error)
+            return
+
+    backup_hosts()
+    forbid_sites(config["forbidden_sites"])
+    if not arguments.silent_mode:
+        print("Your self control session [bold green]started[/bold green]")
+
+    if time_in_seconds is not None:
+        state = lock.lock(state, time_in_seconds)
+    log_activity(state)
 
 
 # stop command
@@ -53,7 +65,11 @@ def cmd_lock(arguments, config):
     if state["lock"]["is_locked"] and lock.get_remaining_time(state) > 0:
         print("This session is already locked")
         return
-    time_in_seconds = lock.parse_lock_time(arguments.locked_for)
+    try:
+        time_in_seconds = lock.parse_lock_time(arguments.locked_for)
+    except lock.InvalidLockTime as error:
+        print_invalid_lock_time(error)
+        return
     state = lock.lock(state, time_in_seconds)
     save_state(state)
 
