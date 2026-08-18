@@ -47,7 +47,11 @@ def cmd_stop(arguments, config):
         if lock.is_locked() and not lock.is_unlock_allowed(state):
             print("This session is locked. You can not stop it.")
             return
-        apply_backup()
+        if not apply_backup() and is_hosts_blocked():
+            print_error(
+                f"{HOSTS_PATH} could not be restored and still blocks the forbidden sites.\n"
+                f"The session stays active. Repair {HOSTS_PATH} manually and run 'stopro stop' again.")
+            return
         state = lock.unlock(state)
         log_activity(state)
         if not arguments.silent_mode:
