@@ -1,4 +1,4 @@
-from shutil import copy2
+from shutil import copy2, move
 from subprocess import call, check_output
 from os import path
 from datetime import datetime
@@ -8,6 +8,9 @@ from rich import print
 
 
 STATE_PATH = "/usr/share/stopro/state.yml"
+HOSTS_PATH = "/etc/hosts"
+HOSTS_BACKUP_PATH = "/etc/hosts.stopro_backup"
+BLOCK_MARKER = "# SELF CONTROL"
 
 # Load yaml file to dictionary
 def load_yaml(yaml_path, debug=False):
@@ -81,18 +84,34 @@ def log_activity(state):
 
 # Blocking sites functions
 def backup_hosts():
-    copy2("/etc/hosts", "/etc/hosts.stopro_backup", follow_symlinks=True)
+    copy2(HOSTS_PATH, HOSTS_BACKUP_PATH, follow_symlinks=True)
 
 
-# Apply backup hosts file
-def apply_backup():
-    call("mv /etc/hosts.stopro_backup /etc/hosts", shell=True)
+# Apply backup hosts file. Returns False when it could not be restored.
+def apply_backup() -> bool:
+    if not path.isfile(HOSTS_BACKUP_PATH):
+        return False
+    try:
+        move(HOSTS_BACKUP_PATH, HOSTS_PATH)
+    except OSError as error:
+        print_error(f"Could not restore {HOSTS_PATH} from {HOSTS_BACKUP_PATH}\n{error}")
+        return False
+    return True
+
+
+# Check whether the blocking rules are still present in the hosts file
+def is_hosts_blocked() -> bool:
+    try:
+        with open(HOSTS_PATH, "r") as hosts:
+            return BLOCK_MARKER in hosts.read()
+    except IOError:
+        return False
 
 
 # Forbid sites by adding rules to /etc/hosts
 def forbid_sites(forbidden_sites):
-    with open("/etc/hosts", "a") as hosts:
-        hosts.write("\n\n# SELF CONTROL\n")
+    with open(HOSTS_PATH, "a") as hosts:
+        hosts.write(f"\n\n{BLOCK_MARKER}\n")
         for site in forbidden_sites:
             hosts.write(f"0.0.0.0 {site}\n0.0.0.0 www.{site}\n::0 {site}\n::0 www.{site}\n")
 
