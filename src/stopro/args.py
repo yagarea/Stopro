@@ -24,6 +24,7 @@ def get_args():
             dest="silent_mode",
             required=False,
             action="store_true",
+            default=argparse.SUPPRESS,
             help="silent mode")
 
     parser_start.add_argument(
@@ -42,6 +43,7 @@ def get_args():
             dest="silent_mode",
             required=False,
             action="store_true",
+            default=argparse.SUPPRESS,
             help="silent mode")
 
     parser_status = command_parser.add_parser(
