@@ -26,12 +26,13 @@ def print_session_status(state):
 
 
 # Get the longest session
-def get_longest_session(sessions: list):
-    if len(sessions) == 0:
+def get_longest_session(sessions: list) -> float:
+    durations = [i.total_seconds() for i in get_session_durations(sessions)]
+    if len(sessions) > 0 and sessions[-1][1] == "+":
+        durations.append(get_duration_of_ongoing_session(sessions))
+    if len(durations) == 0:
         return 0
-    elif len(sessions) == 1:
-        return get_duration_of_ongoing_session(sessions)
-    return max(max([i.total_seconds() for i in get_session_durations(sessions)]), get_duration_of_ongoing_session(sessions))
+    return max(durations)
 
 
 # Prints the global stats
