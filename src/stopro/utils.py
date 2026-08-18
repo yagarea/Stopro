@@ -1,6 +1,6 @@
 from shutil import copy2, move
 from subprocess import call, check_output
-from os import path
+from os import path, makedirs
 from datetime import datetime
 import yaml
 from functools import cache
@@ -51,8 +51,21 @@ def create_new_clean_state():
                            "locked_for": 0,
                            "locked_since": 0,
                            "total_time_locked": 0}
+    create_state_directory()
     write_yaml(clean_state, STATE_PATH)
     return clean_state
+
+
+# Make sure the directory holding the state file exists
+def create_state_directory():
+    state_directory = path.dirname(STATE_PATH)
+    if not state_directory:
+        return
+    try:
+        makedirs(state_directory, exist_ok=True)
+    except OSError as error:
+        print_error(f"Could not create state directory {state_directory}\n{error}")
+        exit(1)
 
 # load stopro state
 @cache
