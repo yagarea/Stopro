@@ -36,3 +36,15 @@ Homepage = "https://github.com/yagarea/Stopro"
 
 [project.scripts]
 stopro = "stopro.__main__:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+addopts = "-ra --strict-markers"
+filterwarnings = ["error"]
