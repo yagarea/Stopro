@@ -63,6 +63,28 @@ forbidden_sites:
   - netflix.com
 ```
 
+## Development
+The project is managed with [uv](https://docs.astral.sh/uv/). To set up the
+environment and run the test suite:
+
+```sh
+uv sync          # creates .venv with runtime and dev dependencies
+uv run pytest    # runs the tests
+```
+
+Useful variations:
+
+```sh
+uv run pytest -v                                    # one line per test
+uv run pytest tests/test_lock.py                    # a single file
+uv run pytest -k "lock and not progress"            # a subset by name
+uv run pytest --cov=stopro --cov-report=term-missing  # coverage report
+```
+
+The tests never touch the real `/etc/hosts` or state file: every path constant
+is redirected to a temporary directory for the duration of each test.
+
+
 ## About
 If you find any bug please create issue. Same goes for feature requests. I am also open
 to pull requests.
