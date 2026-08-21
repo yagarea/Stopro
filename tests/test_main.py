@@ -6,22 +6,23 @@ import pytest
 
 from helpers import DEFAULT_CONFIG, make_args
 from stopro import __main__ as entrypoint
+from stopro.state import State
 
 
-# command -> (handler, needs root, reads the config file)
+# command -> (handler, needs root, reads the config file, reads the state file)
 DISPATCH = [
-    ("start", "cmd_start", True, True),
-    ("stop", "cmd_stop", True, False),
-    ("lock", "cmd_lock", False, False),
-    ("config", "cmd_config", True, False),
-    ("status", "cmd_status", False, False),
-    ("stats", "cmd_stats", False, True),
-    ("clear-history", "cmd_clear_history", False, False),
+    ("start", "cmd_start", True, True, True),
+    ("stop", "cmd_stop", True, False, True),
+    ("lock", "cmd_lock", False, False, True),
+    ("config", "cmd_config", True, False, False),
+    ("status", "cmd_status", False, False, True),
+    ("stats", "cmd_stats", False, True, True),
+    ("clear-history", "cmd_clear_history", False, False, True),
 ]
 
-HANDLERS = [handler for _, handler, _, _ in DISPATCH]
-ROOT_COMMANDS = [(command, handler) for command, handler, root, _ in DISPATCH if root]
-USER_COMMANDS = [(command, handler) for command, handler, root, _ in DISPATCH if not root]
+HANDLERS = [handler for _, handler, _, _, _ in DISPATCH]
+ROOT_COMMANDS = [(c, h) for c, h, root, _, _ in DISPATCH if root]
+USER_COMMANDS = [(c, h) for c, h, root, _, _ in DISPATCH if not root]
 
 
 @pytest.fixture
@@ -31,7 +32,9 @@ def run(monkeypatch):
         def __init__(self):
             self.calls = {}
             self.loaded_configs = []
+            self.loaded_states = []
             self.euid_checks = 0
+            self.state = State(log=[["loaded", "by", "main"]])
 
         def __call__(self, command, *, euid=0, **argument_overrides):
             arguments = make_args(command, **argument_overrides)
@@ -47,11 +50,16 @@ def run(monkeypatch):
                 return DEFAULT_CONFIG
             monkeypatch.setattr(entrypoint, "load_yaml", load_yaml)
 
+            def load_state(state_file=None, debug=False):
+                self.loaded_states.append((state_file, debug))
+                return self.state
+            monkeypatch.setattr(entrypoint.State, "load", load_state)
+
             for handler in HANDLERS:
                 monkeypatch.setattr(
                     entrypoint, handler,
-                    lambda arguments, config, handler=handler:
-                        self.calls.setdefault(handler, []).append((arguments, config)))
+                    lambda arguments, config, state, handler=handler:
+                        self.calls.setdefault(handler, []).append((arguments, config, state)))
 
             entrypoint.main()
             return arguments
@@ -60,14 +68,14 @@ def run(monkeypatch):
 
 class TestDispatch:
 
-    @pytest.mark.parametrize("command, handler, _root, _config", DISPATCH)
-    def test_each_command_reaches_its_handler(self, run, command, handler, _root, _config):
+    @pytest.mark.parametrize("command, handler, _root, _config, _state", DISPATCH)
+    def test_each_command_reaches_its_handler(self, run, command, handler, _root, _config, _state):
         run(command)
         assert list(run.calls) == [handler]
         assert len(run.calls[handler]) == 1
 
-    @pytest.mark.parametrize("command, handler, _root, _config", DISPATCH)
-    def test_the_handler_receives_the_parsed_arguments(self, run, command, handler, _root, _config):
+    @pytest.mark.parametrize("command, handler, _root, _config, _state", DISPATCH)
+    def test_the_handler_receives_the_parsed_arguments(self, run, command, handler, _root, _config, _state):
         arguments = run(command)
         assert run.calls[handler][0][0] is arguments
 
@@ -78,8 +86,8 @@ class TestDispatch:
 
 class TestConfigLoading:
 
-    @pytest.mark.parametrize("command, _handler, _root, reads_config", DISPATCH)
-    def test_only_start_and_stats_read_the_config(self, run, command, _handler, _root, reads_config):
+    @pytest.mark.parametrize("command, _handler, _root, reads_config, _state", DISPATCH)
+    def test_only_start_and_stats_read_the_config(self, run, command, _handler, _root, reads_config, _state):
         run(command)
         assert bool(run.loaded_configs) is reads_config
 
@@ -87,11 +95,11 @@ class TestConfigLoading:
         run("start", config_path="/home/user/stopro.yml")
         assert run.loaded_configs == ["/home/user/stopro.yml"]
 
-    @pytest.mark.parametrize("command, handler, _root, reads_config", DISPATCH)
+    @pytest.mark.parametrize("command, handler, _root, reads_config, _state", DISPATCH)
     def test_the_handler_gets_the_config_only_when_it_was_read(
-            self, run, command, handler, _root, reads_config):
+            self, run, command, handler, _root, reads_config, _state):
         run(command)
-        _, config = run.calls[handler][0]
+        _, config, _ = run.calls[handler][0]
         assert config == (DEFAULT_CONFIG if reads_config else None)
 
     def test_version_never_touches_the_config(self, run, monkeypatch):
@@ -100,11 +108,48 @@ class TestConfigLoading:
         assert run.loaded_configs == []
 
 
+class TestStateLoading:
+
+    @pytest.mark.parametrize("command, _handler, _root, _config, reads_state", DISPATCH)
+    def test_only_the_commands_that_need_it_load_the_state(
+            self, run, command, _handler, _root, _config, reads_state):
+        run(command)
+        assert bool(run.loaded_states) is reads_state
+
+    @pytest.mark.parametrize("command, handler, _root, _config, reads_state", DISPATCH)
+    def test_the_handler_gets_the_loaded_state(
+            self, run, command, handler, _root, _config, reads_state):
+        run(command)
+        _, _, state = run.calls[handler][0]
+        assert state is (run.state if reads_state else None)
+
+    def test_the_state_is_loaded_once_per_run(self, run):
+        run("stats")
+        assert len(run.loaded_states) == 1
+
+    def test_the_debug_flag_reaches_the_state_loader(self, run):
+        run("status", debug=True)
+        assert run.loaded_states == [(None, True)]
+
+    def test_config_and_version_never_touch_the_state_file(self, run, monkeypatch):
+        monkeypatch.setattr(importlib.metadata, "version", lambda name: "0.0.1")
+        run("config")
+        run("version")
+        assert run.loaded_states == []
+
+    def test_the_state_is_loaded_only_after_the_root_check(self, run):
+        """An ordinary user may not create the state file, so the permission
+        error has to come first."""
+        with pytest.raises(SystemExit):
+            run("start", euid=1000)
+        assert run.loaded_states == []
+
+
 class TestRootCheck:
 
-    @pytest.mark.parametrize("command, _handler, needs_root, _config", DISPATCH)
+    @pytest.mark.parametrize("command, _handler, needs_root, _config, _state", DISPATCH)
     def test_only_the_commands_touching_etc_check_for_root(
-            self, run, command, _handler, needs_root, _config):
+            self, run, command, _handler, needs_root, _config, _state):
         run(command)
         assert (run.euid_checks > 0) is needs_root
 

@@ -16,9 +16,8 @@ def print_invalid_lock_time(error):
 
 
 # start command
-def cmd_start(arguments, config):
-    state = get_state(debug=arguments.debug)
-    if state["running"]:
+def cmd_start(arguments, config, state):
+    if state.is_running:
         print("A self control session is already in progress")
         return
 
@@ -35,25 +34,25 @@ def cmd_start(arguments, config):
     if not arguments.silent_mode:
         print("Your self control session [bold green]started[/bold green]")
 
-    if time_in_seconds is not None:
-        state = lock.lock(state, time_in_seconds)
-    log_activity(state)
+    state.start(locked_for=time_in_seconds)
 
 
 # stop command
-def cmd_stop(arguments, config):
-    state = get_state(debug=arguments.debug)
-    if state["running"]:
-        if lock.is_locked() and not lock.is_unlock_allowed(state):
+def cmd_stop(arguments, config, state):
+    if state.is_running:
+        if not state.is_unlock_allowed:
             print("This session is locked. You can not stop it.")
             return
-        if not apply_backup() and is_hosts_blocked():
+        # The result is verified against the hosts file itself instead of the
+        # return value: a backup taken while the sites were already blocked
+        # restores "successfully" but still leaves them blocked.
+        apply_backup()
+        if is_hosts_blocked():
             print_error(
-                f"{HOSTS_PATH} could not be restored and still blocks the forbidden sites.\n"
+                f"{HOSTS_PATH} still blocks the forbidden sites after restoring the backup.\n"
                 f"The session stays active. Repair {HOSTS_PATH} manually and run 'stopro stop' again.")
             return
-        state = lock.unlock(state)
-        log_activity(state)
+        state.stop()
         if not arguments.silent_mode:
             print("Your self control session [bold green]ended[/bold green]")
     else:
@@ -61,12 +60,11 @@ def cmd_stop(arguments, config):
 
 
 # lock command
-def cmd_lock(arguments, config):
-    state = get_state(debug=arguments.debug)
-    if not state["running"]:
+def cmd_lock(arguments, config, state):
+    if not state.is_running:
         print("No self control session is currently running")
         return
-    if state["lock"]["is_locked"] and lock.get_remaining_time(state) > 0:
+    if state.is_locked and state.remaining_lock_time > 0:
         print("This session is already locked")
         return
     try:
@@ -74,24 +72,22 @@ def cmd_lock(arguments, config):
     except lock.InvalidLockTime as error:
         print_invalid_lock_time(error)
         return
-    state = lock.lock(state, time_in_seconds)
-    save_state(state)
+    state.lock(time_in_seconds)
 
 
 # statistics command
-def cmd_stats(arguments, config):
-    cmd_status(arguments, config)
-    state = get_state(debug=arguments.debug)
+def cmd_stats(arguments, config, state):
+    cmd_status(arguments, config, state)
     print_global_stats(state)
 
     print("\n", end="")
 
     console = Console()
-    console.print(Columns(get_achievements(config), equal=True, expand=True))
+    console.print(Columns(get_achievements(state, config), equal=True, expand=True))
 
 
 # config command
-def cmd_config(arguments, config):
+def cmd_config(arguments, config, state):
     editor = environ.get("EDITOR") or "/usr/bin/vim"
     try:
         call(shlex.split(editor) + [arguments.config_path])
@@ -101,24 +97,22 @@ def cmd_config(arguments, config):
 
 
 # clear command
-def cmd_clear_history(arguments, config):
-    state = get_state(debug=arguments.debug)
-    if state["running"]:
+def cmd_clear_history(arguments, config, state):
+    if state.is_running:
         print("You can not clear history during self control session. To continue stop current session and try again.")
     else:
         print("Are you sure you want to clear your history ? [red](this is permanent)[/red] [bold][Y/N][/bold] ")
         answer = str(input()).lower()
         if answer in ("yes", "y"):
-            create_new_clean_state()
+            state.clear()
             print("History was successfully deleted")
 
 
 # status command
-def cmd_status(arguments, config):
-    state = get_state(debug=arguments.debug)
+def cmd_status(arguments, config, state):
     print_session_status(state)
-    if not state["running"]:
+    if not state.is_running:
         return
-    if state["lock"]["is_locked"] and lock.get_remaining_time(state) > 0:
+    if state.is_locked and state.remaining_lock_time > 0:
         lock.static_progressbar(state)
 

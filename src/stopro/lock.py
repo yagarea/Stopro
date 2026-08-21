@@ -1,8 +1,5 @@
-from .utils import get_state, write_yaml, STATE_PATH, format_second
-from dateutil import parser
-from datetime import datetime, timedelta
+from .utils import format_second
 from rich.progress import Progress, BarColumn, TimeRemainingColumn
-from rich import print
 from time import sleep
 
 
@@ -27,56 +24,23 @@ class InvalidLockTime(Exception):
         )
 
 
-def lock(state, for_how_long):
-    state["lock"]["is_locked"] = True
-    state["lock"]["locked_since"] = datetime.now().isoformat()
-    state["lock"]["locked_for"] = for_how_long
-    state["lock"]["total_time_locked"] += for_how_long
-    return state
-
-
-def unlock(state):
-    state["lock"]["is_locked"] = False
-    state["lock"]["locked_since"] = 0
-    state["lock"]["locked_for"] = 0
-    return state
-
-
-def is_locked():
-    return get_state()["lock"]["is_locked"]
-
-
-def is_unlock_allowed(state, debug=False):
-    if debug:
-        print(f"DEBUG:\tLocked since: {state['lock']['locked_since']}")
-        print(f"DEBUG:\tLocked for: {state['lock']['locked_for']}")
-        print(f"DEBUG:\tTotal time locked: {state['lock']['total_time_locked']}")
-        print(f"DEBUG:\tIs locked: {state['lock']['is_locked']}")
-    if not state["lock"]["is_locked"]:
-        return True
-    can_be_open_after = parser.parse(state["lock"]["locked_since"]) + timedelta(seconds=state["lock"]["locked_for"])
-    return datetime.now() > can_be_open_after
-
-
 def progressbar(state):
-    locked_since = parser.parse(state["lock"]["locked_since"])
-    locked_for = state["lock"]["locked_for"]
+    locked_for = state.locked_for
     progress = Progress("Lock:", "[progress.percentage]{task.percentage:>3.0f}%", BarColumn(), TimeRemainingColumn())
     task = progress.add_task("Locking...", total=locked_for)
-    progress.update(task, advance=(int(state["lock"]["locked_for"]) - get_remaining_time(state)))
+    progress.update(task, advance=(int(locked_for) - state.remaining_lock_time))
     progress.start()
-    while not is_unlock_allowed(state):
+    while not state.is_unlock_allowed:
         progress.update(task, advance=1)
         sleep(1)
     progress.stop()
 
 
 def static_progressbar(state):
-    locked_since = parser.parse(state["lock"]["locked_since"])
-    locked_for = state["lock"]["locked_for"]
-    progress = Progress("Lock:", "[progress.percentage]{task.percentage:>3.0f}%", BarColumn(), f"{format_second(get_remaining_time(state))} remaining")
+    locked_for = state.locked_for
+    progress = Progress("Lock:", "[progress.percentage]{task.percentage:>3.0f}%", BarColumn(), f"{format_second(state.remaining_lock_time)} remaining")
     task = progress.add_task("Locking...", total=locked_for)
-    progress.update(task, advance=(locked_for - get_remaining_time(state)))
+    progress.update(task, advance=(locked_for - state.remaining_lock_time))
     progress.start()
     progress.update(task, advance=0)
     progress.stop()
@@ -95,10 +59,3 @@ def parse_lock_time(raw_time):
     if seconds < 0:
         raise InvalidLockTime(raw_time)
     return seconds * multiplier
-
-
-def get_remaining_time(state):
-    can_be_open_after = parser.parse(state["lock"]["locked_since"]) + timedelta(seconds=state["lock"]["locked_for"])
-    return  (can_be_open_after - datetime.now()).total_seconds()
-
-

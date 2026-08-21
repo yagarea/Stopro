@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from helpers import ago, locked_state, make_state, ongoing, session
-from stopro import lock, stats
+from helpers import as_state, locked_state, make_state, ongoing
+from stopro import stats
 
 
 FINISHED = ["2024-05-01 08:00:00", "2024-05-01 09:30:00"]   # 90 minutes
@@ -50,17 +50,17 @@ class TestGetDurationOfOngoingSession:
 class TestGetTotalTime:
 
     def test_zero_without_any_session(self):
-        assert stats.get_total_time(make_state()) == 0
+        assert stats.get_total_time(as_state(make_state())) == 0
 
     def test_sums_the_finished_sessions(self):
-        assert stats.get_total_time(make_state(log=[FINISHED, SHORT])) == 6000.0
+        assert stats.get_total_time(as_state(make_state(log=[FINISHED, SHORT]))) == 6000.0
 
     def test_adds_the_ongoing_session_while_running(self):
-        state = make_state(running=True, log=[FINISHED, ongoing(600)])
+        state = as_state(make_state(running=True, log=[FINISHED, ongoing(600)]))
         assert stats.get_total_time(state) == pytest.approx(6000, abs=5)
 
     def test_a_stale_open_entry_is_ignored_when_not_running(self):
-        state = make_state(running=False, log=[FINISHED, ongoing(600)])
+        state = as_state(make_state(running=False, log=[FINISHED, ongoing(600)]))
         assert stats.get_total_time(state) == 5400.0
 
 
@@ -85,60 +85,60 @@ class TestGetLongestSession:
 class TestGetTotalTimeLocked:
 
     def test_reads_the_lifetime_counter(self):
-        assert stats.get_total_time_locked(make_state(total_time_locked=4242)) == 4242
+        assert stats.get_total_time_locked(as_state(make_state(total_time_locked=4242))) == 4242
 
     def test_zero_on_a_fresh_state(self):
-        assert stats.get_total_time_locked(make_state()) == 0
+        assert stats.get_total_time_locked(as_state(make_state())) == 0
 
 
 class TestPrintSessionStatus:
 
-    def test_reports_an_idle_stopro(self, state_file, output):
-        state = state_file.write(make_state())
+    def test_reports_an_idle_stopro(self, output):
+        state = as_state(make_state())
         stats.print_session_status(state)
         assert output() == "Self control session is not activated"
 
-    def test_reports_a_running_session_with_its_duration(self, state_file, output):
-        state = state_file.write(make_state(running=True, log=[ongoing(3600)]))
+    def test_reports_a_running_session_with_its_duration(self, output):
+        state = as_state(make_state(running=True, log=[ongoing(3600)]))
         stats.print_session_status(state)
         printed = output()
         assert "Self control session is activated" in printed
         assert "Current session: 1 hour" in printed
 
-    def test_reports_the_lock(self, state_file, output):
-        state = state_file.write(locked_state(locked_for=1800))
+    def test_reports_the_lock(self, output):
+        state = as_state(locked_state(locked_for=1800))
         stats.print_session_status(state)
         assert "This session is locked. (30 minutes)" in output()
 
 
 class TestPrintLockStatus:
 
-    def test_unlocked_session(self, state_file, output):
-        state = state_file.write(make_state(running=True, log=[ongoing(60)]))
+    def test_unlocked_session(self, output):
+        state = as_state(make_state(running=True, log=[ongoing(60)]))
         stats.print_lock_status(state)
         assert output() == "This session is not locked"
 
-    def test_locked_session_shows_the_lock_length(self, state_file, output):
-        state = state_file.write(locked_state(locked_for=7200))
+    def test_locked_session_shows_the_lock_length(self, output):
+        state = as_state(locked_state(locked_for=7200))
         stats.print_lock_status(state)
         assert output() == "This session is locked. (2 hours)"
 
-    def test_an_expired_lock_reads_as_unlocked(self, state_file, output):
-        state = state_file.write(locked_state(locked_for=60, locked_since_seconds_ago=3600))
+    def test_an_expired_lock_reads_as_unlocked(self, output):
+        state = as_state(locked_state(locked_for=60, locked_since_seconds_ago=3600))
         stats.print_lock_status(state)
         assert output() == "This session is not locked"
 
-    def test_the_state_file_decides_whether_a_lock_exists(self, state_file, output):
-        """print_lock_status() asks lock.is_locked(), which re-reads the file."""
+    def test_reports_the_state_it_was_given_not_the_one_on_disk(self, state_file, output):
+        """It used to call lock.is_locked(), which re-read the file instead."""
         state_file.write(make_state())
-        stats.print_lock_status(locked_state(locked_for=7200))
-        assert output() == "This session is not locked"
+        stats.print_lock_status(as_state(locked_state(locked_for=7200)))
+        assert output() == "This session is locked. (2 hours)"
 
 
 class TestPrintGlobalStats:
 
     def test_reports_all_four_numbers(self, output):
-        stats.print_global_stats(make_state(log=[FINISHED, SHORT]))
+        stats.print_global_stats(as_state(make_state(log=[FINISHED, SHORT])))
         printed = output()
         assert "Total time: 1 hour 40 minutes" in printed
         assert "Average time: 50 minutes" in printed
@@ -146,7 +146,7 @@ class TestPrintGlobalStats:
         assert "Longest: 1 hour 30 minutes" in printed
 
     def test_a_fresh_install_reports_zeroes(self, output):
-        stats.print_global_stats(make_state())
+        stats.print_global_stats(as_state(make_state()))
         printed = output()
         assert "Total time: 0 seconds" in printed
         assert "Average time: 0 seconds" in printed
@@ -154,17 +154,17 @@ class TestPrintGlobalStats:
         assert "Longest: 0 seconds" in printed
 
     def test_the_running_session_is_not_counted_yet(self, output):
-        state = make_state(running=True, log=[FINISHED, SHORT, ongoing(60)])
+        state = as_state(make_state(running=True, log=[FINISHED, SHORT, ongoing(60)]))
         stats.print_global_stats(state)
         assert "Total sessions: 2" in output()
 
     def test_the_very_first_session_averages_its_own_length(self, output):
-        state = make_state(running=True, log=[ongoing(1800)])
+        state = as_state(make_state(running=True, log=[ongoing(1800)]))
         stats.print_global_stats(state)
         printed = output()
         assert "Total sessions: 0" in printed
         assert "Average time: 30 minutes" in printed
 
     def test_no_division_by_zero_on_the_first_session(self, output):
-        stats.print_global_stats(make_state(running=True, log=[ongoing(1)]))
+        stats.print_global_stats(as_state(make_state(running=True, log=[ongoing(1)])))
         assert "Average time:" in output()

@@ -13,13 +13,15 @@ import yaml
 
 from stopro import __main__ as entrypoint
 from stopro import achievments, commands, lock, stats, utils
+from stopro import state as state_module
+from stopro.state import State
 
 
 ORIGINAL_HOSTS = "127.0.0.1\tlocalhost\n::1\t\tip6-localhost\n"
 
 # commands.py does `from .utils import *`, so it holds its own binding of every
 # constant; rebinding only utils would leave stale copies behind.
-_MODULES = (utils, commands, lock, stats, achievments, entrypoint)
+_MODULES = (utils, commands, lock, stats, achievments, entrypoint, state_module)
 
 
 def _rebind(monkeypatch, name, value):
@@ -30,7 +32,7 @@ def _rebind(monkeypatch, name, value):
 
 @pytest.fixture(autouse=True)
 def paths(tmp_path, monkeypatch):
-    """Point every path constant at tmp_path and reset the get_state cache."""
+    """Point every path constant at a tmp_path of this test's own."""
     state_path = tmp_path / "share" / "stopro" / "state.yml"
     hosts_path = tmp_path / "etc" / "hosts"
     backup_path = tmp_path / "etc" / "hosts.stopro_backup"
@@ -45,9 +47,7 @@ def paths(tmp_path, monkeypatch):
     # not depend on the terminal the suite happens to run in.
     monkeypatch.setenv("COLUMNS", "200")
 
-    utils.get_state.cache_clear()
     yield SimpleNamespace(state=state_path, hosts=hosts_path, backup=backup_path)
-    utils.get_state.cache_clear()
 
 
 class _StateFile:
@@ -55,10 +55,9 @@ class _StateFile:
         self.path = path
 
     def write(self, state):
-        """Persist a state dict and drop the cache so it is picked up."""
+        """Persist a state dict in the on-disk format."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.write_text(yaml.dump(state))
-        utils.get_state.cache_clear()
         return state
 
     def read(self):
@@ -94,6 +93,16 @@ class _HostsFile:
 @pytest.fixture
 def state_file(paths):
     return _StateFile(paths.state)
+
+
+@pytest.fixture
+def load_state(state_file):
+    """Seed the state file and load it the way main() does."""
+    def _load(state_dict=None):
+        if state_dict is not None:
+            state_file.write(state_dict)
+        return State.load()
+    return _load
 
 
 @pytest.fixture

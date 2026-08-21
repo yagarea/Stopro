@@ -5,8 +5,7 @@ from io import StringIO
 import pytest
 from rich.console import Console
 
-from helpers import DEFAULT_CONFIG, make_state, ongoing, session
-from stopro import achievments
+from helpers import DEFAULT_CONFIG, as_state, make_state, session
 from stopro.achievments import (Achievement, ForbiddenSitesAchievement,
                                 LongestSessionAchievement, TotalLockedTime,
                                 TotalTimeAchievement, get_achievements)
@@ -99,54 +98,53 @@ class TestRendering:
         assert "(2)" in rendered
 
     def test_every_real_achievement_renders(self, state_file):
-        state_file.write(make_state())
-        for achievement in get_achievements(DEFAULT_CONFIG):
+        state = as_state(make_state())
+        for achievement in get_achievements(state, DEFAULT_CONFIG):
             assert render(achievement) != ""
 
 
 class TestTotalTimeAchievement:
 
     def test_starts_at_level_zero(self, state_file):
-        state_file.write(make_state())
-        achievement = TotalTimeAchievement()
+        state = as_state(make_state())
+        achievement = TotalTimeAchievement(state)
         assert achievement.name == "Stoic"
         assert achievement.level == 0
         assert achievement.stat == "0 seconds"
 
     def test_a_day_of_focus_earns_the_first_level(self, state_file):
-        state_file.write(make_state(log=[session(90000, 3600)]))
-        achievement = TotalTimeAchievement()
+        state = as_state(make_state(log=[session(90000, 3600)]))
+        achievement = TotalTimeAchievement(state)
         assert achievement.level == 1
         assert "1 day" in achievement.stat
 
     def test_reads_the_total_from_the_state_file(self, state_file):
-        state_file.write(make_state(log=[["2024-05-01 08:00:00", "2024-05-01 09:00:00"]]))
-        assert TotalTimeAchievement().stat == "1 hour"
+        state = as_state(make_state(log=[["2024-05-01 08:00:00", "2024-05-01 09:00:00"]]))
+        assert TotalTimeAchievement(state).stat == "1 hour"
 
 
 class TestLongestSessionAchievement:
 
     def test_starts_at_level_zero(self, state_file):
-        state_file.write(make_state())
-        achievement = LongestSessionAchievement()
+        state = as_state(make_state())
+        achievement = LongestSessionAchievement(state)
         assert achievement.name == "Marathonist"
         assert achievement.level == 0
 
     def test_a_five_hour_session_earns_the_first_level(self, state_file):
-        state_file.write(make_state(log=[session(18000, 0)]))
-        achievement = LongestSessionAchievement()
+        state = as_state(make_state(log=[session(18000, 0)]))
+        achievement = LongestSessionAchievement(state)
         assert achievement.level == 1
         assert "5 hours" in achievement.stat
 
     def test_only_the_longest_session_counts(self, state_file):
-        state_file.write(make_state(log=[session(18000, 0), session(600, 0)]))
-        assert LongestSessionAchievement().level == 1
+        state = as_state(make_state(log=[session(18000, 0), session(600, 0)]))
+        assert LongestSessionAchievement(state).level == 1
 
 
 class TestForbiddenSitesAchievement:
 
-    def test_counts_the_configured_sites(self, state_file):
-        state_file.write(make_state())
+    def test_counts_the_configured_sites(self):
         achievement = ForbiddenSitesAchievement(DEFAULT_CONFIG)
         assert achievement.name == "Ascetic"
         assert achievement.stat == "3 sites are blocked"
@@ -155,8 +153,7 @@ class TestForbiddenSitesAchievement:
     @pytest.mark.parametrize("site_count, expected_level", [
         (0, 0), (4, 0), (5, 1), (10, 2), (20, 3), (30, 4), (40, 5), (50, 6), (99, 6),
     ])
-    def test_level_follows_the_number_of_sites(self, state_file, site_count, expected_level):
-        state_file.write(make_state())
+    def test_level_follows_the_number_of_sites(self, site_count, expected_level):
         config = {"forbidden_sites": [f"site{i}.com" for i in range(site_count)]}
         assert ForbiddenSitesAchievement(config).level == expected_level
 
@@ -164,15 +161,15 @@ class TestForbiddenSitesAchievement:
 class TestTotalLockedTime:
 
     def test_starts_at_level_zero(self, state_file):
-        state_file.write(make_state())
-        achievement = TotalLockedTime()
+        state = as_state(make_state())
+        achievement = TotalLockedTime(state)
         assert achievement.name == "Totalitarian"
         assert achievement.level == 0
         assert achievement.stat == "0 seconds"
 
     def test_reads_the_lifetime_lock_counter(self, state_file):
-        state_file.write(make_state(total_time_locked=90000))
-        achievement = TotalLockedTime()
+        state = as_state(make_state(total_time_locked=90000))
+        achievement = TotalLockedTime(state)
         assert achievement.level == 1
         assert "1 day" in achievement.stat
 
@@ -180,18 +177,19 @@ class TestTotalLockedTime:
 class TestGetAchievements:
 
     def test_returns_the_four_badges_in_order(self, state_file):
-        state_file.write(make_state())
-        names = [achievement.name for achievement in get_achievements(DEFAULT_CONFIG)]
+        state = as_state(make_state())
+        names = [achievement.name for achievement in get_achievements(state, DEFAULT_CONFIG)]
         assert names == ["Stoic", "Marathonist", "Ascetic", "Totalitarian"]
 
     def test_each_badge_is_fully_populated(self, state_file):
-        state_file.write(make_state())
-        for achievement in get_achievements(DEFAULT_CONFIG):
+        state = as_state(make_state())
+        for achievement in get_achievements(state, DEFAULT_CONFIG):
             assert achievement.description
             assert achievement.stat
             assert len(achievement.level_milestones) == 6
             assert len(achievement.next_level_message) == 6
 
     def test_works_on_a_machine_that_never_ran_a_session(self, state_file):
+        from stopro.state import State
         assert not state_file.exists()
-        assert len(get_achievements(DEFAULT_CONFIG)) == 4
+        assert len(get_achievements(State.load(), DEFAULT_CONFIG)) == 4

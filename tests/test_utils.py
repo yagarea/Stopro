@@ -1,11 +1,9 @@
 """Tests for stopro.utils: yaml IO, state handling and the hosts file."""
 
-from datetime import datetime
-
 import pytest
 import yaml
 
-from helpers import make_state, ongoing
+from helpers import make_state
 from stopro import utils
 
 
@@ -102,6 +100,17 @@ class TestStateDirectory:
         utils.create_state_directory()
         assert not (tmp_path / "state.yml").exists()
 
+    def test_creates_the_directory_of_a_given_path(self, tmp_path):
+        target = tmp_path / "elsewhere" / "state.yml"
+        utils.create_state_directory(str(target))
+        assert target.parent.is_dir()
+
+    def test_a_given_path_wins_over_the_constant(self, tmp_path, paths):
+        target = tmp_path / "elsewhere" / "state.yml"
+        utils.create_state_directory(str(target))
+        assert target.parent.is_dir()
+        assert not paths.state.parent.exists()
+
     def test_failure_to_create_exits(self, monkeypatch, output):
         def explode(*args, **kwargs):
             raise OSError("read-only file system")
@@ -110,130 +119,6 @@ class TestStateDirectory:
             utils.create_state_directory()
         assert exit_info.value.code == 1
         assert "Could not create state directory" in output()
-
-
-class TestCleanState:
-
-    def test_has_the_documented_shape(self):
-        clean = utils.create_new_clean_state()
-        assert clean == {
-            "log": [],
-            "running": False,
-            "lock": {
-                "is_locked": False,
-                "locked_for": 0,
-                "locked_since": 0,
-                "total_time_locked": 0,
-            },
-        }
-
-    def test_is_written_to_the_state_file(self, state_file):
-        returned = utils.create_new_clean_state()
-        assert state_file.read() == returned
-
-    def test_overwrites_previous_history(self, state_file):
-        state_file.write(make_state(log=[["a", "b"], ["c", "d"]], total_time_locked=99))
-        utils.create_new_clean_state()
-        assert state_file.read()["log"] == []
-        assert state_file.read()["lock"]["total_time_locked"] == 0
-
-
-class TestGetState:
-
-    def test_creates_a_clean_state_when_the_file_is_missing(self, state_file):
-        assert not state_file.exists()
-        assert utils.get_state()["running"] is False
-        assert state_file.exists()
-
-    def test_reads_an_existing_state_file(self, state_file):
-        stored = state_file.write(make_state(running=True, total_time_locked=42))
-        assert utils.get_state() == stored
-
-    def test_result_is_cached(self, state_file):
-        state_file.write(make_state())
-        assert utils.get_state() is utils.get_state()
-
-    def test_cache_hides_later_edits_until_cleared(self, state_file):
-        state_file.write(make_state(running=False))
-        assert utils.get_state()["running"] is False
-        state_file.write(make_state(running=True))  # write() clears the cache
-        assert utils.get_state()["running"] is True
-
-    def test_debug_argument_is_part_of_the_cache_key(self, state_file):
-        state_file.write(make_state())
-        assert utils.get_state() is not utils.get_state(debug=True)
-
-
-class TestSaveState:
-
-    def test_writes_the_state_verbatim(self, state_file):
-        state = state_file.write(make_state())
-        state["running"] = True
-        state["log"] = [ongoing(60)]
-        utils.save_state(state)
-        assert state_file.read() == state
-
-
-class TestStateWritesNeedTheDirectory:
-    """save_state()/log_activity() write straight to STATE_PATH.
-
-    Only get_state() ever creates the directory, so a state directory that
-    disappears mid-session takes the process down with an error.
-    """
-
-    def test_save_state_exits_when_the_directory_is_gone(self, output):
-        with pytest.raises(SystemExit) as exit_info:
-            utils.save_state(make_state())
-        assert exit_info.value.code == 1
-        assert "Error occurred while writing" in output()
-
-    def test_get_state_first_makes_the_write_succeed(self, state_file):
-        state = utils.get_state()
-        utils.save_state(state)
-        assert state_file.read() == state
-
-
-class TestLogActivity:
-
-    def test_starting_opens_a_new_entry(self, state_file, freeze_now):
-        moment = freeze_now(datetime(2024, 5, 1, 8, 0, 0), utils)
-        state = state_file.write(make_state(running=False))
-        utils.log_activity(state)
-        assert state["running"] is True
-        assert state["log"] == [[str(moment), "+"]]
-        assert state_file.read() == state
-
-    def test_stopping_closes_the_open_entry(self, state_file, freeze_now):
-        moment = freeze_now(datetime(2024, 5, 1, 12, 0, 0), utils)
-        state = state_file.write(make_state(running=True, log=[["2024-05-01 08:00:00", "+"]]))
-        utils.log_activity(state)
-        assert state["running"] is False
-        assert state["log"] == [["2024-05-01 08:00:00", str(moment)]]
-        assert state_file.read() == state
-
-    def test_earlier_sessions_are_left_alone(self, state_file):
-        state = state_file.write(make_state(running=True, log=[["a", "b"], ["c", "+"]]))
-        utils.log_activity(state)
-        assert state["log"][0] == ["a", "b"]
-        assert state["log"][1][1] != "+"
-
-    def test_stopping_without_history_reports_corruption(self, state_file, output, freeze_now):
-        moment = freeze_now(datetime(2024, 5, 1, 12, 0, 0), utils)
-        state = state_file.write(make_state(running=True, log=[]))
-        utils.log_activity(state)
-        assert "log corrupted" in output()
-        assert state["log"] == [["?", str(moment)]]
-        assert state["running"] is False
-
-    def test_start_stop_start_leaves_two_entries(self, state_file):
-        state = state_file.write(make_state())
-        utils.log_activity(state)
-        utils.log_activity(state)
-        utils.log_activity(state)
-        assert len(state["log"]) == 2
-        assert state["log"][0][1] != "+"
-        assert state["log"][1][1] == "+"
-        assert state["running"] is True
 
 
 class TestHostsBackup:

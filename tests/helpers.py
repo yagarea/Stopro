@@ -6,12 +6,14 @@ Kept free of fixtures so they can be used inside parametrize lists too.
 from argparse import Namespace
 from datetime import datetime, timedelta
 
+from stopro.state import State
+
 
 DEFAULT_CONFIG = {"forbidden_sites": ["example.com", "example.org", "example.net"]}
 
 
 def ago(**delta) -> str:
-    """An ISO timestamp `delta` in the past, the format lock.lock() writes."""
+    """An ISO timestamp `delta` in the past, the format State.lock() writes."""
     return (datetime.now() - timedelta(**delta)).isoformat()
 
 
@@ -27,7 +29,7 @@ def session(start_seconds_ago: float, end_seconds_ago: float) -> list:
 
 def make_state(*, running=False, log=None, is_locked=False, locked_since=0,
                locked_for=0, total_time_locked=0) -> dict:
-    """A state dictionary shaped exactly like create_new_clean_state() writes."""
+    """A state dictionary shaped exactly like the file on disk."""
     return {
         "running": running,
         "log": [] if log is None else log,
@@ -50,6 +52,11 @@ def locked_state(*, locked_for=1800, locked_since_seconds_ago=0, **overrides) ->
         locked_for=locked_for,
         **overrides,
     )
+
+
+def as_state(state_dict) -> State:
+    """The same fields as a state dict, as the object the app passes around."""
+    return State.from_dict(state_dict)
 
 
 def make_args(command="status", **overrides) -> Namespace:

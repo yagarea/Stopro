@@ -1,12 +1,20 @@
 #!/usr/bin/env python
 
-from os import geteuid, path, chdir
+from os import geteuid
 from .commands import *
 from .args import get_args
+from .state import State
 
 
 
 DEBUG = False
+
+# Commands that write to /etc or to the state directory.
+ROOT_COMMANDS = ("start", "stop", "config")
+# Commands that read the configuration file.
+CONFIG_COMMANDS = ("start", "stats")
+# Commands that read or change the state file.
+STATE_COMMANDS = ("start", "stop", "lock", "status", "stats", "clear-history")
 
 
 def check_root():
@@ -17,33 +25,37 @@ def check_root():
 
 def main():
     arguments = get_args()
+    command = arguments.command
+
     # Only "start" and "stats" read the config, so the other commands must not
     # fail when it is missing or unparsable.
-    config = None
-    if arguments.command in ("start", "stats"):
-        config = load_yaml(arguments.config_path)
-    if arguments.command == "start":
+    config = load_yaml(arguments.config_path) if command in CONFIG_COMMANDS else None
+
+    if command in ROOT_COMMANDS:
         check_root()
-        cmd_start(arguments, config)
-    elif arguments.command == "stop":
-        check_root()
-        cmd_stop(arguments, config)
-    elif arguments.command == "lock":
-        cmd_lock(arguments, config)
-    elif arguments.command == "config":
-        check_root()
-        cmd_config(arguments, config)
-    elif arguments.command == "status":
-        cmd_status(arguments, config)
-    elif arguments.command == "stats":
-        cmd_stats(arguments, config)
-    elif arguments.command == "clear-history":
-        cmd_clear_history(arguments, config)
-    elif arguments.command == "version":
+
+    # Loading the state comes after the root check because it creates the state
+    # file when it is missing, which an ordinary user is not allowed to do.
+    state = State.load(debug=arguments.debug) if command in STATE_COMMANDS else None
+
+    if command == "start":
+        cmd_start(arguments, config, state)
+    elif command == "stop":
+        cmd_stop(arguments, config, state)
+    elif command == "lock":
+        cmd_lock(arguments, config, state)
+    elif command == "config":
+        cmd_config(arguments, config, state)
+    elif command == "status":
+        cmd_status(arguments, config, state)
+    elif command == "stats":
+        cmd_stats(arguments, config, state)
+    elif command == "clear-history":
+        cmd_clear_history(arguments, config, state)
+    elif command == "version":
         from importlib.metadata import version
         print(version("stopro"))
 
 
 if __name__ == "__main__":
     main()
-

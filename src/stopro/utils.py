@@ -1,9 +1,7 @@
 from shutil import copy2, move
 from subprocess import call, check_output
 from os import path, makedirs
-from datetime import datetime
 import yaml
-from functools import cache
 from rich import print
 
 
@@ -42,23 +40,9 @@ def write_yaml(yaml_content, file_path):
         exit(1)
 
 
-# create new clean state
-def create_new_clean_state():
-    clean_state = dict()
-    clean_state["log"] = list()
-    clean_state["running"] = False
-    clean_state["lock"] = {"is_locked": False,
-                           "locked_for": 0,
-                           "locked_since": 0,
-                           "total_time_locked": 0}
-    create_state_directory()
-    write_yaml(clean_state, STATE_PATH)
-    return clean_state
-
-
 # Make sure the directory holding the state file exists
-def create_state_directory():
-    state_directory = path.dirname(STATE_PATH)
+def create_state_directory(state_path=None):
+    state_directory = path.dirname(state_path or STATE_PATH)
     if not state_directory:
         return
     try:
@@ -66,33 +50,6 @@ def create_state_directory():
     except OSError as error:
         print_error(f"Could not create state directory {state_directory}\n{error}")
         exit(1)
-
-# load stopro state
-@cache
-def get_state(debug=False):
-    if path.isfile(STATE_PATH):
-        return load_yaml(STATE_PATH, debug)
-    else:
-        return create_new_clean_state()
-
-# save stopro state
-def save_state(state):
-    write_yaml(state, STATE_PATH)
-
-
-# Write current state to state file
-def log_activity(state):
-    if state["running"]:                        # is running
-        state["running"] = False
-        if len(state["log"]) > 0:
-            state["log"][-1][1] = str(datetime.now())
-        else:
-            print("log corrupted")
-            state["log"].append(["?", str(datetime.now())])
-    else:                                       # is not running
-        state["running"] = True
-        state["log"].append([str(datetime.now()), "+"])
-    write_yaml(state, STATE_PATH)
 
 
 # Blocking sites functions
